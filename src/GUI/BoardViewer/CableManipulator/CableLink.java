@@ -45,7 +45,7 @@ public class CableLink {
         addPoint(node.getPosition());
         completed = true;
 
-        if(to.setLink(this) && from.setLink(this))
+        if(from != to && to.setLink(this) && from.setLink(this))
             return true;
         else {
             from.clearCable();
