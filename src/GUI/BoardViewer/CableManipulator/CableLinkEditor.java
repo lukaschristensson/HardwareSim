@@ -3,6 +3,7 @@ package GUI.BoardViewer.CableManipulator;
 import GUI.BoardViewer.BoardViewer;
 import GUI.BoardViewer.DrawContributer;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
+import UtilPackage.Cursor;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -25,6 +26,7 @@ public class CableLinkEditor extends VBox implements DrawContributer {
     private CableLink currentCable;
     private ColorPicker colorPicker;
     private EventHandler<MouseEvent> canvasMouseEvent;
+    private Point latestMouseP = new Point(0, 0);
 
     public CableLinkEditor(int width, int height, BoardViewer boardViewer){
         super(10);
@@ -43,6 +45,7 @@ public class CableLinkEditor extends VBox implements DrawContributer {
             if (e.getCode() == KeyCode.C)
                 startDraw.fire();
         });
+        boardViewer.addEventHandler(MouseEvent.MOUSE_MOVED, (e)-> latestMouseP = new Point((int)e.getX(),(int)e.getY()));
 
         getChildren().addAll(startDraw, colorPicker);
     }
@@ -54,6 +57,7 @@ public class CableLinkEditor extends VBox implements DrawContributer {
             boardViewer.addDrawContributor(this);
             boardViewer.addEventHandler(MouseEvent.MOUSE_CLICKED, canvasMouseEvent);
             boardViewer.removeEventHandler(MouseEvent.MOUSE_CLICKED, boardViewer.placeOrSwitch);
+            Cursor.setCursor(javafx.scene.Cursor.CROSSHAIR);
         };
     }
 
@@ -62,6 +66,7 @@ public class CableLinkEditor extends VBox implements DrawContributer {
         boardViewer.addEventHandler(MouseEvent.MOUSE_CLICKED, boardViewer.placeOrSwitch);
         startDraw.setDisable(false);
         currentCable = null;
+        Cursor.clearHand();
         boardViewer.removeDrawContributor(this);
     }
 
@@ -93,8 +98,8 @@ public class CableLinkEditor extends VBox implements DrawContributer {
 
     @Override
     public void drawSelf(GraphicsContext gc) {
-        if (currentCable != null && currentCable.path.size() > 1) {
-            currentCable.drawSelf(gc);
+        if (currentCable != null && currentCable.path.size() >= 1) {
+            currentCable.drawSelf(gc, latestMouseP);
         }
     }
 

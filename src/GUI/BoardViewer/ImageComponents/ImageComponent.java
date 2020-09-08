@@ -42,6 +42,10 @@ public abstract class ImageComponent {
     public void setSize(int width, int height){
         setSize(new Dimension(width,height));
     }
+    public Dimension getSize() {
+        return dim;
+    }
+
     public void setPos(Point pos) {
         this.pos = pos;
     }

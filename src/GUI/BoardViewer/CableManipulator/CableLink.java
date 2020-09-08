@@ -54,13 +54,26 @@ public class CableLink {
         }
     }
 
-    public void drawSelf(GraphicsContext gc) {
+    public void drawSelf(GraphicsContext gc){
         gc.setStroke(color);
         gc.setLineWidth(width);
         Point lastp = path.get(0);
         for (int i = 1; i < path.size(); i++){
             gc.strokeLine(lastp.x, lastp.y, path.get(i).x, path.get(i).y);
             lastp = path.get(i);
+        }
+    }
+
+    public void drawSelf(GraphicsContext gc, Point bufferP) {
+        gc.setStroke(color);
+        gc.setLineWidth(width);
+        Point lastp = path.get(0);
+        for (int i = 1; i < path.size(); i++){
+            gc.strokeLine(lastp.x, lastp.y, path.get(i).x, path.get(i).y);
+            lastp = path.get(i);
+        }
+        if (bufferP != null){
+            gc.strokeLine(lastp.x, lastp.y, bufferP.x, bufferP.y);
         }
     }
 }

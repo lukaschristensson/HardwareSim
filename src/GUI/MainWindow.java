@@ -32,7 +32,6 @@ public class MainWindow extends Application {
         Scene pScene = new Scene(pGroup);
         primaryStage.setScene(pScene);
 
-        Cursor.setScene(pScene);
 
         HBox mainHbox = new HBox();
         pGroup.getChildren().addAll(mainHbox);
@@ -74,6 +73,9 @@ public class MainWindow extends Application {
 
             }
         }.start();
+
+        Cursor.setSceneWithCanvas(pScene, bv);
+        bv.addDrawContributor(Cursor.getShadowComp());
 
         primaryStage.show();
     }

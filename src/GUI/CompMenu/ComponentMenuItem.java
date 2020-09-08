@@ -29,7 +29,8 @@ public abstract class ComponentMenuItem extends Button {
     private EventHandler<MouseEvent> getMouseOnClickEvent() {
         return (e) -> {
             if (e.getButton().equals(MouseButton.PRIMARY)){
-                UtilPackage.Cursor.setCursorImage(ImageLibrary.getImage(getImageComp().getImages()[0]));
+                UtilPackage.Cursor.setCursor(javafx.scene.Cursor.CLOSED_HAND);
+                //UtilPackage.Cursor.setCursorImage(ImageLibrary.getImage(getImageComp().getImages()[0]));
                 Cursor.hold(getImageComp().getEmptyCopy());
             }
         };
