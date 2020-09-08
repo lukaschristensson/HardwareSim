@@ -67,7 +67,6 @@ public class MainWindow extends Application {
                 SuperClock.tick();
             }
         }, 0, 5);
-
         new AnimationTimer() {
             @Override
             public void handle(long now) {
