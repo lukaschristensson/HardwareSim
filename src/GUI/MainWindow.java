@@ -24,7 +24,7 @@ public class MainWindow extends Application {
 
     private Timer superClockTimer;
 
-    public void run(String[] args){
+    public static void main(String[] args) {
         launch(args);
     }
 

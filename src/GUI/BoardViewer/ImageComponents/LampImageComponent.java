@@ -45,7 +45,6 @@ public class LampImageComponent extends ImageComponent implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("lamp updated with" + (boolean)arg);
         if (o instanceof Lamp && arg instanceof Boolean)
             this.lit = (boolean) arg;
     }

@@ -16,7 +16,7 @@ public class Button extends Component implements GeneratingComponent {
         this(null,pulseLength);
     }
     public Button(){
-        this(100);
+        this(600);
     }
 
     @Override
@@ -62,7 +62,8 @@ public class Button extends Component implements GeneratingComponent {
     @Override
     public String generate() {
         if (!currentlyDown) {
-            outputLink.setState(1);
+            if (outputLink != null)
+                outputLink.setState(1);
             currentlyDown = true;
             EventWorker.addTriggerEvent((ps)->{
                 if (ps != null)
@@ -72,13 +73,14 @@ public class Button extends Component implements GeneratingComponent {
             }, pulseLength);
             setChanged();
             notifyObservers(currentlyDown);
-            return getName() + " is now pressed down";
+            return getName() + " is now pressed down" + (outputLink == null? " but is disconnected": "");
         } else {
-            outputLink.setState(0);
+            if (outputLink != null)
+                outputLink.setState(0);
             currentlyDown = false;
             setChanged();
             notifyObservers(currentlyDown);
-            return getName() + " is now released";
+            return getName() + " is now released" + (outputLink == null? " but is disconnected": "");
         }
     }
 }
