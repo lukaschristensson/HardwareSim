@@ -44,7 +44,7 @@ public class BinaryInt{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass().equals(BinaryInt.class))
+        if (obj instanceof BinaryInt)
             return ((BinaryInt)obj).state.equals(state);
         return false;
     }

@@ -9,6 +9,9 @@ import javafx.geometry.Pos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -36,6 +39,10 @@ public class CableLinkEditor extends VBox implements DrawContributer {
 
         startDraw = new Button("New Cable");
         startDraw.setOnAction(getStartDrawEvent());
+        boardViewer.addEventHandler(KeyEvent.KEY_PRESSED, (e)-> {
+            if (e.getCode() == KeyCode.C)
+                startDraw.fire();
+        });
 
         getChildren().addAll(startDraw, colorPicker);
     }
@@ -60,10 +67,13 @@ public class CableLinkEditor extends VBox implements DrawContributer {
 
     private EventHandler<MouseEvent> getOnCanvasClick(){
         return e -> {
-            Point mouseP = new Point((int)e.getX(), (int)e.getY());
-            ImageComponent.CNode hitNode = boardViewer.getComponentAt(mouseP);
-            addPoint(hitNode, mouseP);
-            boardViewer.update();
+            if (e.getButton() == MouseButton.PRIMARY) {
+                Point mouseP = new Point((int) e.getX(), (int) e.getY());
+                ImageComponent.CNode hitNode = boardViewer.getComponentAt(mouseP);
+                addPoint(hitNode, mouseP);
+                boardViewer.update();
+            } else if (e.getButton() == MouseButton.SECONDARY)
+                cancelDraw();
         };
     }
 

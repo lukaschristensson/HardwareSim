@@ -25,6 +25,7 @@ public class BoardViewer extends Canvas{
 
     public BoardViewer(float width, float height){
         super(width,height);
+        addEventHandler(MouseEvent.MOUSE_PRESSED, (e)-> requestFocus());
         board = new Board();
         dcs = new ArrayList<>();
         ics = new ArrayList<>();

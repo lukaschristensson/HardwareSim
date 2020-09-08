@@ -8,8 +8,6 @@ import GUI.CompMenu.ComponentMenu;
 import TimeHandle.SuperClock;
 import UtilPackage.Cursor;
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -40,7 +38,7 @@ public class MainWindow extends Application {
         pGroup.getChildren().addAll(mainHbox);
 
         ComponentMenu cm = new ComponentMenu(200, 300);
-        BoardViewer bv = new BoardViewer(500, 500);
+        BoardViewer bv = new BoardViewer(700, 500);
         CableLinkEditor cle = new CableLinkEditor(200, 200, bv);
 
         VBox cmcle = new VBox();
@@ -59,7 +57,7 @@ public class MainWindow extends Application {
         cm.addMenuItem(cic);
 
 
-        EventWorker.setPrintStream(System.out);
+        //EventWorker.setPrintStream(System.out);
         SuperClock.addTimeDependant(new EventWorker());
 
         superClockTimer = new Timer();

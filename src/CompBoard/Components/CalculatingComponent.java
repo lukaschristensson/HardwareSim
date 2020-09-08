@@ -24,7 +24,7 @@ public abstract class CalculatingComponent extends Component implements Reactive
         }
         BinaryInt[] results = calculateForInput(ins);
         for (int i = 0; i < outputs.length; i++) {
-            if(outputs[i] != null)
+            if(outputs[i] != null && results[i] != null)
                 outputs[i].setState(results[i]);
         }
         return getName() + ": calculated inputs and out it in the outputs";
