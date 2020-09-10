@@ -68,6 +68,7 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
         return true;
     }
 
+
     @Override
     public String react() {
         lit = in.getState().getAsBool();
@@ -84,9 +85,13 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
         return getName() + " is now " + (lit? "lit" : " unlit") + (out != null? " and generate has been queued":"");
     }
     @Override
-    public String generate() {
+    public String generate(boolean forced) {
         if (out != null && in != null)
-            out.setState(in.getState());
+            out.setState(in.getState(), forced);
         return getName() + " passed signal through it";
+    }
+    @Override
+    public String generate() {
+        return generate(false);
     }
 }

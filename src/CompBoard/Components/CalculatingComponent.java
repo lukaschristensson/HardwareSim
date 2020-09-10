@@ -16,7 +16,12 @@ public abstract class CalculatingComponent extends Component implements Reactive
     }
 
     @Override
-    public final String generate() {
+    public String generate() {
+        return generate(false);
+    }
+
+    @Override
+    public final String generate(boolean forced) {
         BinaryInt[] ins = new BinaryInt[inputs.length];
         for (int i = 0; i < inputs.length; i++) {
             if(inputs[i] != null)
@@ -25,9 +30,9 @@ public abstract class CalculatingComponent extends Component implements Reactive
         BinaryInt[] results = calculateForInput(ins);
         for (int i = 0; i < outputs.length; i++) {
             if(outputs[i] != null && results[i] != null)
-                outputs[i].setState(results[i]);
+                outputs[i].setState(results[i], forced);
         }
-        return getName() + ": calculated inputs and out it in the outputs";
+        return getName() + " calculated inputs and out it in the outputs";
     }
 
     @Override

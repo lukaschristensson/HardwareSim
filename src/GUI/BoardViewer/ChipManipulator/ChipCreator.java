@@ -26,7 +26,6 @@ import javafx.scene.paint.Color;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +34,7 @@ import java.util.Optional;
 public class ChipCreator extends BoardViewer {
     public final static Integer maxInputs = 12;
     public final static Integer maxOutputs = 12;
+    public final static String chipDir = "chDir";
 
     private boolean running = false;
     private ArrayList<PassImageComponent> inNodes;
@@ -259,7 +259,7 @@ public class ChipCreator extends BoardViewer {
 
         MenuItem loadChip = new MenuItem("Load a chip");
         loadChip.setOnAction(e ->{
-            JFileChooser fileChooser = new JFileChooser(ImageLibrary.RES_URL);
+            JFileChooser fileChooser = new JFileChooser(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir);
             fileChooser.showDialog(null, null);
             if (fileChooser.getSelectedFile() != null)
                 try (BufferedReader br = new BufferedReader(new FileReader(fileChooser.getSelectedFile()))) {
@@ -340,16 +340,15 @@ public class ChipCreator extends BoardViewer {
                     return null;
                 }
 
-                if (linkInfo[0].startsWith("O"))
-                    ((GeneratingComponent)comp1).addOutput(reconstructedLink);
-                else
+                if (linkInfo[0].startsWith("O")) {
+                    ((GeneratingComponent) comp1).addOutput(reconstructedLink);
+                } else
                     ((ReactiveComponent) comp1).addInput(reconstructedLink);
 
-                if (linkInfo[1].startsWith("O"))
-                    ((GeneratingComponent)comp2).addOutput(reconstructedLink);
-                else
+                if (linkInfo[1].startsWith("O")) {
+                    ((GeneratingComponent) comp2).addOutput(reconstructedLink);
+                } else
                     ((ReactiveComponent) comp2).addInput(reconstructedLink);
-
             }
 
         }
@@ -363,6 +362,8 @@ public class ChipCreator extends BoardViewer {
         for (Pass p: reconstructedOutputs)
             outputNodes.add(new PassImageComponent(nodeOrbRad,nodeOrbBorderWidth, null, p).outputNodes[0]);
 
+        for (Pass p: reconstructedInputs)
+            p.generate(true);
         cic.setInputNodes(inputNodes.toArray(new ImageComponent.CNode[]{}));
         cic.setOutputNodes(outputNodes.toArray(new ImageComponent.CNode[]{}));
 
@@ -389,7 +390,7 @@ public class ChipCreator extends BoardViewer {
                     .append(cl.getTo().getType()) .append(cl.getTo().parent.getComp().getName())
                     .append("\n");
         subChips.forEach(saveString::append);
-        try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + name +".ch")) {
+        try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name +".ch")) {
             out.print(saveString);
         } catch (Exception e){e.printStackTrace();}
     }

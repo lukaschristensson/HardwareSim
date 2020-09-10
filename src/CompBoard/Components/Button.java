@@ -66,22 +66,28 @@ public class Button extends Component implements GeneratingComponent {
 
     @Override
     public String generate() {
+        return generate(false);
+    }
+
+    @Override
+    public String generate(boolean forced) {
         if (!currentlyDown) {
             if (outputLink != null)
-                outputLink.setState(1);
+                outputLink.setState(1, forced);
             currentlyDown = true;
-            EventWorker.addTriggerEvent((ps)->{
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            }, pulseLength);
+            if (!forced)
+                EventWorker.addTriggerEvent((ps)->{
+                    if (ps != null)
+                        ps.println(generate());
+                    else
+                        generate();
+                }, pulseLength);
             setChanged();
             notifyObservers(currentlyDown);
             return getName() + " is now pressed down" + (outputLink == null? " but is disconnected": "");
         } else {
             if (outputLink != null)
-                outputLink.setState(0);
+                outputLink.setState(0, forced);
             currentlyDown = false;
             setChanged();
             notifyObservers(currentlyDown);

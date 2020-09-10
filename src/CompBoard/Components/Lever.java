@@ -62,13 +62,18 @@ public class Lever extends Component implements GeneratingComponent {
         return outputState;
     }
 
+
     @Override
-    public String generate() {
+    public String generate(boolean forced) {
         if (outputLink == null) {
             return getName() + " switched, but is disconnected";
         }
 
-        outputLink.setState(outputState);
+        outputLink.setState(outputState, forced);
         return getName() + " switched to " + outputState;
+    }
+    @Override
+    public String generate() {
+        return generate(false);
     }
 }

@@ -71,10 +71,15 @@ public class Clock extends Component implements GeneratingComponent {
 
     @Override
     public String generate() {
+        return generate(false);
+    }
+
+    @Override
+    public String generate(boolean forced) {
         if (!enabled)
             return getName() + " quarried but disabled";
 
-        if (outLink == null){
+        if (outLink == null && !forced){
             EventWorker.addTriggerEvent((ps)->{
                 if (ps != null)
                     ps.println(generate());
@@ -85,7 +90,7 @@ public class Clock extends Component implements GeneratingComponent {
         }
 
         outputState = outputState.inverse();
-        outLink.setState(outputState);
+        outLink.setState(outputState, forced);
         EventWorker.addTriggerEvent((ps)->{
             if (ps != null)
                 ps.println(generate());

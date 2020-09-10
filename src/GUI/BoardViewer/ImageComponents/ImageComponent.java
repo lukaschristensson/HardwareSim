@@ -177,9 +177,9 @@ public abstract class ImageComponent{
                     case OUTPUT:
                         EventWorker.addTriggerEvent((ps -> {
                             if (ps != null)
-                                ps.println(((GeneratingComponent)parent.getComp()).generate());
+                                ps.println(((GeneratingComponent)parent.getComp()).generate(true));
                             else
-                                ((GeneratingComponent)parent.getComp()).generate();
+                                ((GeneratingComponent)parent.getComp()).generate(true);
                         }));
                         return ((GeneratingComponent)parent.getComp()).addOutput(cable.l);
                     case INPUT:

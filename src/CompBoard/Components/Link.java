@@ -9,8 +9,6 @@ import java.util.Observable;
 public class Link extends Observable {
     private BinaryInt state;
     private ArrayList<ReactiveComponent> chainComponents;
-    private boolean sunk;
-    private  boolean raised;
 
     public Link(){
         state = new BinaryInt();
@@ -25,8 +23,12 @@ public class Link extends Observable {
         chainComponents.add(rc);
     }
 
-    public void setState(BinaryInt state) {
-        if (!this.state.equals(state) && !sunk && !raised) {
+    public void setState(BinaryInt state){
+        setState(state, false);
+    }
+
+    public void setState(BinaryInt state, boolean forced) {
+        if (!this.state.equals(state) || forced) {
             this.state = state;
             for (ReactiveComponent rc : chainComponents)
                 EventWorker.addTriggerEvent((ps) -> {
@@ -40,7 +42,13 @@ public class Link extends Observable {
     public void setState(int i){
         setState(new BinaryInt(i));
     }
+    public void setState(int i, boolean forced){
+        setState(new BinaryInt(i), forced);
+    }
     public void setState(boolean b){
         setState(new BinaryInt(b));
+    }
+    public void setState(boolean b, boolean forced){
+        setState(new BinaryInt(b), forced);
     }
 }
