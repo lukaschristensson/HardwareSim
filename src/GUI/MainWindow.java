@@ -16,7 +16,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +29,7 @@ public class MainWindow extends Application {
     public static ChipCreator cc;
     public static ComponentMenu cm;
     public static CableLinkEditor cle;
+    public static Stage pStage;
 
     public static void main(String[] args) {
         launch(args);
@@ -37,8 +37,7 @@ public class MainWindow extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        System.out.println(new File("").getPath());
-
+        pStage = primaryStage;
         Group pGroup = new Group();
         Scene pScene = new Scene(pGroup);
         primaryStage.setScene(pScene);
@@ -74,7 +73,7 @@ public class MainWindow extends Application {
         cm.addMenuItem(cic);
 
 
-        //EventWorker.setPrintStream(System.out);
+        EventWorker.setPrintStream(System.out);
         SuperClock.addTimeDependant(new EventWorker());
 
         superClockTimer = new Timer();

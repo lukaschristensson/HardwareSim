@@ -22,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 
 import javax.swing.*;
 import java.awt.*;
@@ -256,13 +257,14 @@ public class ChipCreator extends BoardViewer {
             }else
                 MainWindow.setCurrentActiveCanvas(MainWindow.bv);
         });
-
+        ;
         MenuItem loadChip = new MenuItem("Load a chip");
         loadChip.setOnAction(e ->{
-            JFileChooser fileChooser = new JFileChooser(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir);
-            fileChooser.showDialog(null, null);
-            if (fileChooser.getSelectedFile() != null)
-                try (BufferedReader br = new BufferedReader(new FileReader(fileChooser.getSelectedFile()))) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(new File(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir));
+            File selectedFile = fileChooser.showOpenDialog(MainWindow.pStage);
+            if (selectedFile != null)
+                try (BufferedReader br = new BufferedReader(new FileReader(selectedFile))) {
                     String line;
                     StringBuilder sb = new StringBuilder();
                     while ((line = br.readLine()) != null) {
@@ -375,24 +377,41 @@ public class ChipCreator extends BoardViewer {
     private void saveChip(){
         StringBuilder saveString = new StringBuilder();
 
-        String name =  JOptionPane.showInputDialog(null, "Chip name: ");
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Name your chip");
+        dialog.setHeaderText("name: ");
+        dialog.setContentText("");
+        Optional<String> nameVal = dialog.showAndWait();
+        if (nameVal.isPresent() && nameVal.get().length() != 0) {
 
-        saveString.append(currentChip.inputSize + "\n");
-        saveString.append(currentChip.outputSize + "\n");
+            String name = nameVal.get();
 
-        for (Component c: board.getComponents())
-            saveString.append(c.getName() + "\n");
+            saveString.append(currentChip.inputSize + "\n");
+            saveString.append(currentChip.outputSize + "\n");
 
-        for (CableLink cl: cls)
-            saveString.append(
-                    cl.getFrom().getType()).append(cl.getFrom().parent.getComp().getName())
-                    .append(" -> ")
-                    .append(cl.getTo().getType()) .append(cl.getTo().parent.getComp().getName())
-                    .append("\n");
-        subChips.forEach(saveString::append);
-        try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name +".ch")) {
-            out.print(saveString);
-        } catch (Exception e){e.printStackTrace();}
+            for (Component c : board.getComponents())
+                saveString.append(c.getName() + "\n");
+
+            for (CableLink cl : cls)
+                saveString.append(
+                        cl.getFrom().getType()).append(cl.getFrom().parent.getComp().getName())
+                        .append(" -> ")
+                        .append(cl.getTo().getType()).append(cl.getTo().parent.getComp().getName())
+                        .append("\n");
+            subChips.forEach(saveString::append);
+            try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name + ".ch")) {
+                out.print(saveString);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else{
+            Alert err = new Alert(Alert.AlertType.ERROR);
+            err.setTitle("Error");
+            err.setContentText("A non valid or name caused a problem, nothing was saved");
+            err.setHeaderText("Save failed");
+            err.showAndWait();
+        }
+
     }
 
     public void cancelChip(){
