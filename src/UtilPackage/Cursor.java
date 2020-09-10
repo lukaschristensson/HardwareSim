@@ -19,13 +19,16 @@ public class Cursor {
     private static Scene mScene;
     private static Point latestMouseP;
 
-    public static void setSceneWithCanvas(Scene scene, Canvas c) {
+    public static void setScene(Scene scene) {
         mScene = scene;
-        c.addEventHandler(MouseEvent.MOUSE_MOVED, (e)->latestMouseP = new Point((int)e.getX(), (int)e.getY()));
         scene.setOnMouseClicked(e->{
             if (e.getButton().equals(MouseButton.SECONDARY))
                 clearHand();
         });
+    }
+
+    public static void setCanvas(Canvas c){
+        c.addEventHandler(MouseEvent.MOUSE_MOVED, (e)->latestMouseP = new Point((int)e.getX(), (int)e.getY()));
     }
 
     public static void setCursorImage(Image i){
@@ -53,11 +56,12 @@ public class Cursor {
         return new DrawContributer() {
             @Override
             public void drawSelf(GraphicsContext gc) {
-                gc.setEffect(new ColorAdjust(0, 0, -0.5, 0));
-                ImageComponent imc = (ImageComponent)heldObject;
-                Image im = ImageLibrary.getImage((imc).getImages()[0]);
-                gc.drawImage(im, latestMouseP.x, latestMouseP.y, imc.getSize().width, imc.getSize().height);
-                gc.setEffect(null);
+                if (latestMouseP != null) {
+                    gc.setEffect(new ColorAdjust(0, 0, -0.5, 0));
+                    ImageComponent imc = (ImageComponent) heldObject;
+                    imc.drawSelf(gc, latestMouseP);
+                    gc.setEffect(null);
+                }
             }
 
             @Override

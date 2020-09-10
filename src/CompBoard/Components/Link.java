@@ -18,10 +18,6 @@ public class Link extends Observable {
     }
 
     public BinaryInt getState() {
-        if (sunk)
-            return new BinaryInt(0);
-        if (raised)
-            return new BinaryInt(1);
         return state;
     }
 
@@ -46,13 +42,5 @@ public class Link extends Observable {
     }
     public void setState(boolean b){
         setState(new BinaryInt(b));
-    }
-
-    public void setRaised(boolean raised) {
-        this.raised = raised;
-    }
-
-    public void setSunk(boolean sunk) {
-        this.sunk = sunk;
     }
 }

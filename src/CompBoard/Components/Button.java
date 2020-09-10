@@ -24,6 +24,11 @@ public class Button extends Component implements GeneratingComponent {
         return name == null || name.length() == 0?"*button*":name;
     }
 
+    @Override
+    public char getCompChar() {
+        return 'B';
+    }
+
 
     @Override
     public int getOutputSize() {

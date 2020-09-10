@@ -25,6 +25,11 @@ public class Splitter extends CalculatingComponent {
         return name == null || name.length() == 0? "*Splitter*":name;
     }
 
+    @Override
+    public char getCompChar() {
+        return 'E';
+    }
+
 
     @Override
     public int getInputSize() {
@@ -68,6 +73,7 @@ public class Splitter extends CalculatingComponent {
         if (inputs[0] != null)
             return false;
         inputs[0] = in;
+        in.addChainedComp(this);
         return true;
     }
 }

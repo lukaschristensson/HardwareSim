@@ -16,4 +16,7 @@ public class Board {
     public boolean removeComponent(Component c){
         return components.remove(c);
     }
+    public ArrayList<Component> getComponents() {
+        return components;
+    }
 }

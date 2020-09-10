@@ -24,6 +24,11 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
     }
 
     @Override
+    public char getCompChar() {
+        return 'L';
+    }
+
+    @Override
     public int getOutputSize() {
         return out == null ? 0: 1;
     }
@@ -45,6 +50,7 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
         if (this.in != null)
             return false;
         this.in = in;
+        this.in.addChainedComp(this);
         return true;
     }
 
@@ -79,7 +85,8 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
     }
     @Override
     public String generate() {
-        out.setState(in.getState());
-        return name + " passed signal through it";
+        if (out != null && in != null)
+            out.setState(in.getState());
+        return getName() + " passed signal through it";
     }
 }

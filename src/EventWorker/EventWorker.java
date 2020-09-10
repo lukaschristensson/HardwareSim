@@ -7,7 +7,7 @@ import java.io.PrintStream;
 public class EventWorker implements TimeDependant {
     public static long now = 0;
     private static EventInst LIST;
-    private static final long BASE_ADD_TIME = 5;
+    private static final long BASE_ADD_TIME = 1;
     private static PrintStream ps;
 
     public static boolean addTriggerEvent(TriggerEvent te, long time) {

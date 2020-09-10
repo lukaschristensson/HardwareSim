@@ -1,6 +1,7 @@
 package GUI.BoardViewer.ImageComponents;
 
 import CompBoard.Components.Button;
+import GUI.BoardViewer.BoardViewer;
 import UtilPackage.ImageLibrary;
 import javafx.scene.canvas.GraphicsContext;
 

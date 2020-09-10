@@ -28,6 +28,11 @@ public class NANDGate extends CalculatingComponent{
     }
 
     @Override
+    public char getCompChar() {
+        return 'N';
+    }
+
+    @Override
     public int getOutputSize() {
         return 1;
     }
@@ -66,6 +71,7 @@ public class NANDGate extends CalculatingComponent{
     public boolean addInput(Link in) {
         if (inputs[0] != null && inputs[1] != null)
             return false;
+        in.addChainedComp(this);
         if (inputs[0] == null)
             inputs[0] = in;
         else

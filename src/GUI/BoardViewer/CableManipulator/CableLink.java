@@ -17,6 +17,14 @@ public class CableLink {
     ArrayList<Point> path;
     public boolean completed;
 
+    public ImageComponent.CNode getFrom() {
+        return from;
+    }
+
+    public ImageComponent.CNode getTo() {
+        return to;
+    }
+
     public CableLink(){
         l = new Link();
         completed = false;

@@ -5,6 +5,7 @@ import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.BoardViewer.ImageComponents.ClickableComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import UtilPackage.Cursor;
+import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -16,21 +17,27 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class BoardViewer extends Canvas{
-    private Board board;
-    private ArrayList<CableLink> cls;
-    private ArrayList<ImageComponent> ics;
+    protected Board board;
+    protected ArrayList<CableLink> cls;
+    protected ArrayList<ImageComponent> ics;
     private ArrayList<DrawContributer> dcs;
-    private Color backgroundColor;
+    protected Color backgroundColor = new Color(0.8, 0.8, 0.8, 1);
     public EventHandler<MouseEvent> placeOrSwitch;
+    protected AnimationTimer at;
 
     public BoardViewer(float width, float height){
         super(width,height);
         addEventHandler(MouseEvent.MOUSE_PRESSED, (e)-> requestFocus());
+        at = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                update();
+            }
+        };
         board = new Board();
         dcs = new ArrayList<>();
         ics = new ArrayList<>();
         cls = new ArrayList<>();
-        backgroundColor = new Color(0.8, 0.8, 0.8, 1);
 
         placeOrSwitch = e->{
             if (e.getButton() == MouseButton.PRIMARY) {
@@ -51,6 +58,19 @@ public class BoardViewer extends Canvas{
 
         addEventHandler(MouseEvent.MOUSE_CLICKED, placeOrSwitch);
         clearCanvas();
+    }
+
+    public void resetContent(){
+        board = new Board();
+        ics = new ArrayList<>();
+        cls = new ArrayList<>();
+    }
+
+    public void startUpdate(){
+        at.start();
+    }
+    public void stopUpdate(){
+        at.stop();
     }
 
     public ImageComponent.CNode getComponentAt(Point p){

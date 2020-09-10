@@ -14,7 +14,7 @@ public class ImageLibrary {
 
     public static void loadImages() {
         library = new HashMap<>();
-        loadFromDir("E:\\HardwareProj\\HardWareSimRef\\Res");
+        loadFromDir("\\HardwareProj\\HardWareSimRef\\Res");
     }
 
     public static Image getImage(String name){

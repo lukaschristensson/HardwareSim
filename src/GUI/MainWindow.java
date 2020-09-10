@@ -3,24 +3,33 @@ package GUI;
 import EventWorker.EventWorker;
 import GUI.BoardViewer.BoardViewer;
 import GUI.BoardViewer.CableManipulator.CableLinkEditor;
+import GUI.BoardViewer.ChipManipulator.ChipCreator;
 import GUI.BoardViewer.ImageComponents.*;
 import GUI.CompMenu.ComponentMenu;
 import TimeHandle.SuperClock;
 import UtilPackage.Cursor;
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainWindow extends Application {
 
     private Timer superClockTimer;
+    public static BoardViewer currentBV;
+    public static VBox mainVBox;
+    public static HBox mainHBox;
+    public static BoardViewer bv;
+    public static ChipCreator cc;
+    public static ComponentMenu cm;
+    public static CableLinkEditor cle;
 
     public static void main(String[] args) {
         launch(args);
@@ -28,22 +37,31 @@ public class MainWindow extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        System.out.println(new File("").getPath());
+
         Group pGroup = new Group();
         Scene pScene = new Scene(pGroup);
         primaryStage.setScene(pScene);
 
+        MenuBar menuBar = new MenuBar();
 
-        HBox mainHbox = new HBox();
-        pGroup.getChildren().addAll(mainHbox);
+        mainHBox = new HBox();
 
-        ComponentMenu cm = new ComponentMenu(200, 300);
-        BoardViewer bv = new BoardViewer(700, 500);
-        CableLinkEditor cle = new CableLinkEditor(200, 200, bv);
+        cm = new ComponentMenu(200, 300);
+        bv = new BoardViewer(700, 500);
+        cc = new ChipCreator(700, 500);
+        cle = new CableLinkEditor(200, 200, bv);
+
+        menuBar.getMenus().addAll(cc.getAsMenu());
 
         VBox cmcle = new VBox();
         cmcle.getChildren().addAll(cm, cle);
 
-        mainHbox.getChildren().addAll(cmcle, bv);
+        mainHBox.getChildren().addAll(cmcle);
+        mainVBox = new VBox();
+        mainVBox.getChildren().addAll(menuBar, mainHBox);
+
+        pGroup.getChildren().addAll(mainVBox);
 
         cm.addMenuItem(new ButtonImageComponent());
         cm.addMenuItem(new LampImageComponent());
@@ -66,18 +84,27 @@ public class MainWindow extends Application {
                 SuperClock.tick();
             }
         }, 0, 5);
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                bv.update();
 
-            }
-        }.start();
+        Cursor.setScene(pScene);
 
-        Cursor.setSceneWithCanvas(pScene, bv);
         bv.addDrawContributor(Cursor.getShadowComp());
+        cc.addDrawContributor(Cursor.getShadowComp());
+
+        setCurrentActiveCanvas(bv);
 
         primaryStage.show();
+    }
+
+    public static void setCurrentActiveCanvas(BoardViewer bv){
+        if (currentBV != null) {
+            currentBV.stopUpdate();
+            mainHBox.getChildren().set(1, bv);
+        } else
+            mainHBox.getChildren().addAll(bv);
+        currentBV = bv;
+        cle.switchBoardViewer(bv);
+        Cursor.setCanvas(bv);
+        bv.startUpdate();
     }
 
     @Override

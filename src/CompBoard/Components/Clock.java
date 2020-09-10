@@ -6,7 +6,7 @@ import UtilPackage.BinaryInt;
 
 public class Clock extends Component implements GeneratingComponent {
     private Link outLink;
-    private boolean enabled = false;
+    private boolean enabled = true;
     private long onPeriod;
     private long offPeriod;
     private BinaryInt outputState;
@@ -18,7 +18,6 @@ public class Clock extends Component implements GeneratingComponent {
         this(null,onPreriod,offPeriod);
     }
     public Clock(Link l,long onPeriod,long offPeriod){
-        EventWorker.addTriggerEvent((ps)->this.toggleActive(),500);
         outLink = l;
         this.onPeriod = onPeriod;
         this.offPeriod = offPeriod;
@@ -44,6 +43,11 @@ public class Clock extends Component implements GeneratingComponent {
     @Override
     public String getName() {
         return name == null || name.length() == 0 ? "*Clock*" : name;
+    }
+
+    @Override
+    public char getCompChar() {
+        return 'C';
     }
 
     @Override
@@ -77,7 +81,7 @@ public class Clock extends Component implements GeneratingComponent {
                 else
                     generate();
             }, outputState.getAsBool() ? onPeriod : offPeriod);
-            return getName() + " quarried but disconnected";
+            return ""; //getName() + " quarried but disconnected";
         }
 
         outputState = outputState.inverse();

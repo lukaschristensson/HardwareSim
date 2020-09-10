@@ -27,6 +27,11 @@ public class CableLinkEditor extends VBox implements DrawContributer {
     private ColorPicker colorPicker;
     private EventHandler<MouseEvent> canvasMouseEvent;
     private Point latestMouseP = new Point(0, 0);
+    private EventHandler<MouseEvent> updateLatestMouseP = (e)-> latestMouseP = new Point((int)e.getX(),(int)e.getY());
+    private EventHandler<KeyEvent> cableShortCut = (e)-> {
+        if (e.getCode() == KeyCode.C)
+            startDraw.fire();
+    };
 
     public CableLinkEditor(int width, int height, BoardViewer boardViewer){
         super(10);
@@ -40,14 +45,26 @@ public class CableLinkEditor extends VBox implements DrawContributer {
         colorPicker = new ColorPicker(Color.BLACK);
 
         startDraw = new Button("New Cable");
-        startDraw.setOnAction(getStartDrawEvent());
-        boardViewer.addEventHandler(KeyEvent.KEY_PRESSED, (e)-> {
-            if (e.getCode() == KeyCode.C)
-                startDraw.fire();
-        });
-        boardViewer.addEventHandler(MouseEvent.MOUSE_MOVED, (e)-> latestMouseP = new Point((int)e.getX(),(int)e.getY()));
 
         getChildren().addAll(startDraw, colorPicker);
+    }
+
+    public void switchBoardViewer(BoardViewer bv){
+        this.boardViewer = bv;
+
+        try {
+            cancelDraw();
+        } catch(Exception e){}
+        try {
+            boardViewer.removeEventHandler(MouseEvent.MOUSE_MOVED, updateLatestMouseP);
+        }catch (Exception e){}
+        try {
+            boardViewer.removeEventHandler(KeyEvent.KEY_PRESSED, cableShortCut);
+        }catch (Exception e){}
+
+        boardViewer.addEventHandler(MouseEvent.MOUSE_MOVED, updateLatestMouseP);
+        startDraw.setOnAction(getStartDrawEvent());
+        boardViewer.addEventHandler(KeyEvent.KEY_PRESSED, cableShortCut);
     }
 
     private EventHandler<ActionEvent> getStartDrawEvent(){

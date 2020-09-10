@@ -26,6 +26,11 @@ public class Lever extends Component implements GeneratingComponent {
     }
 
     @Override
+    public char getCompChar() {
+        return 'S';
+    }
+
+    @Override
     public int getOutputSize() {
         return 1;
     }
