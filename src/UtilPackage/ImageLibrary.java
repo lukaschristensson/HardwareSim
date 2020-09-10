@@ -11,10 +11,12 @@ import java.util.Map;
 public class ImageLibrary {
     private static Map<String, Image> library;
     private static ArrayList<String> accpetedFileTypes = new ArrayList<String>(){{add("jpeg"); add("png"); add("jpg");}};
+    public static String ESCAPE_CHAR = "\\";
+    public static String RES_URL = ESCAPE_CHAR + "HardwareProj" + ESCAPE_CHAR + "HardWareSimRef" + ESCAPE_CHAR + "Res";
 
     public static void loadImages() {
         library = new HashMap<>();
-        loadFromDir("\\HardwareProj\\HardWareSimRef\\Res");
+        loadFromDir(RES_URL);
     }
 
     public static Image getImage(String name){

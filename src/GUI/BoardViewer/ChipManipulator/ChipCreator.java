@@ -8,6 +8,7 @@ import GUI.BoardViewer.DrawContributer;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import GUI.MainWindow;
 import UtilPackage.Cursor;
+import UtilPackage.ImageLibrary;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -258,7 +259,7 @@ public class ChipCreator extends BoardViewer {
 
         MenuItem loadChip = new MenuItem("Load a chip");
         loadChip.setOnAction(e ->{
-            JFileChooser fileChooser = new JFileChooser("\\HardwareProj\\HardWareSimRef\\Res\\");
+            JFileChooser fileChooser = new JFileChooser(ImageLibrary.RES_URL);
             fileChooser.showDialog(null, null);
             if (fileChooser.getSelectedFile() != null)
                 try (BufferedReader br = new BufferedReader(new FileReader(fileChooser.getSelectedFile()))) {
@@ -299,20 +300,23 @@ public class ChipCreator extends BoardViewer {
         for (int i = 2; i < rawLineInfo.size(); i++)
             lineInfo[i] = (i-2) < compInf.size() ?  compInf.get(i - 2) : linkInf.get((i-2) - compInf.size());
 
-        for (String s: lineInfo)
-            System.out.println(s);
-
-        int inputSize = Integer.parseInt(lineInfo[0].substring(0, 1));
-        int outputSize = Integer.parseInt(lineInfo[1].substring(0, 1));
+        int inputSize = Integer.parseInt(lineInfo[0]);
+        int outputSize = Integer.parseInt(lineInfo[1]);
 
         for (int i = 2; i < lineInfo.length; i++){
             String info = lineInfo[i];
             if (!info.contains(" -> ")) {
+                int numberID = Integer.MAX_VALUE;
+
+                try {
+                    numberID = Integer.parseInt(lineInfo[i].substring(1));
+                }catch (Exception e){}
+
                 Component reconstructedComp = Component.getCompByChar(info.charAt(0));
-                if (Integer.parseInt(lineInfo[i].substring(1,2))  < inputSize && !lineInfo[i].contains("ch")) {
+                if (numberID < inputSize && !lineInfo[i].contains("ch")) {
                     reconstructedInputs.add((Pass) reconstructedComp);
                 }
-                else if (Integer.parseInt(lineInfo[i].substring(1,2)) < inputSize + outputSize && !lineInfo[i].contains("ch")) {
+                else if (numberID < inputSize + outputSize && !lineInfo[i].contains("ch")) {
                     reconstructedOutputs.add((Pass) reconstructedComp);
                 }
                 if (reconstructedComp == null)
@@ -385,7 +389,7 @@ public class ChipCreator extends BoardViewer {
                     .append(cl.getTo().getType()) .append(cl.getTo().parent.getComp().getName())
                     .append("\n");
         subChips.forEach(saveString::append);
-        try (PrintWriter out = new PrintWriter("\\HardwareProj\\HardWareSimRef\\Res\\" + name +".ch")) {
+        try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + name +".ch")) {
             out.print(saveString);
         } catch (Exception e){e.printStackTrace();}
     }
