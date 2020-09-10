@@ -1,7 +1,9 @@
 package GUI.BoardViewer;
 
 import CompBoard.Board.Board;
+import CompBoard.Components.Component;
 import GUI.BoardViewer.CableManipulator.CableLink;
+import GUI.BoardViewer.ChipManipulator.ChipImageComponent;
 import GUI.BoardViewer.ImageComponents.ClickableComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import UtilPackage.Cursor;
@@ -61,7 +63,13 @@ public class BoardViewer extends Canvas{
     }
 
     public void resetContent(){
+        for (Component c: board.getComponents())
+            if (c != null)
+                c.deactivate();
         board = new Board();
+        for (ImageComponent ic: ics)
+            if (ic instanceof ChipImageComponent)
+                ((ChipImageComponent) ic).deactivate();
         ics = new ArrayList<>();
         cls = new ArrayList<>();
     }

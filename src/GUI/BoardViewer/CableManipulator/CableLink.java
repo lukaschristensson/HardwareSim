@@ -7,8 +7,10 @@ import javafx.scene.paint.Color;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
-public class CableLink {
+public class CableLink implements Observer {
     public Link l;
     Color color;
     Integer width = 3;
@@ -53,9 +55,10 @@ public class CableLink {
         addPoint(node.getPosition());
         completed = true;
 
-        if(from != to && to.setLink(this) && from.setLink(this))
+        if(from != to && to.setLink(this) && from.setLink(this)) {
+            l.addObserver(this);
             return true;
-        else {
+        } else {
             from.clearCable();
             to.clearCable();
             return false;
@@ -83,5 +86,13 @@ public class CableLink {
         if (bufferP != null){
             gc.strokeLine(lastp.x, lastp.y, bufferP.x, bufferP.y);
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if ((boolean)arg)
+            color = Color.RED;
+        else
+            color = Color.BLACK;
     }
 }

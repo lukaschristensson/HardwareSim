@@ -1,11 +1,13 @@
 package GUI.BoardViewer.ChipManipulator;
 
 import CompBoard.Components.Component;
+import CompBoard.Components.GeneratingComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 
 public class ChipImageComponent extends ImageComponent{
@@ -15,6 +17,11 @@ public class ChipImageComponent extends ImageComponent{
     private static final int chipWidth = 20;
     private static final Color basicChipColor = Color.BLACK.brighter();
     private String saveData;
+    private ArrayList<Component> comps;
+
+    public void setComps(ArrayList<Component> comps) {
+        this.comps = comps;
+    }
 
     public ChipImageComponent(int inputSize, int outputSize) {
         super(null);
@@ -73,6 +80,11 @@ public class ChipImageComponent extends ImageComponent{
     @Override
     public ImageComponent getEmptyCopy() {
         return ChipCreator.loadChip(saveData);
+    }
+
+    public void deactivate(){
+        for (Component c: comps)
+            c.deactivate();
     }
 
     public void addPrefix(String s){

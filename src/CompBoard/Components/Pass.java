@@ -21,6 +21,11 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
     }
 
     @Override
+    public void deactivate() {
+        active = false;
+    }
+
+    @Override
     public int getOutputSize() {
         return 1;
     }
@@ -79,15 +84,17 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
 
     @Override
     public String generate() {
-        return generate(false);
+        if (active)
+            return generate(false);
+        return "";
     }
 
     @Override
     public String generate(boolean forced) {
         if (out != null && in != null)
             out.setState(in.getState(), forced);
-        else if (out != null)
-            out.setState(0, forced);
+        if (out != null && in == null)
+            out.setState(1, forced);
         return getName() + " passed signal through";
     }
 }

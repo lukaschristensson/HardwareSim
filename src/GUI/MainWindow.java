@@ -15,7 +15,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,6 +42,17 @@ public class MainWindow extends Application {
         primaryStage.setScene(pScene);
 
         MenuBar menuBar = new MenuBar();
+
+        Menu fileMenu = new Menu("File");
+        MenuItem clear = new MenuItem("Clear");
+        clear.setOnAction(e->{
+            if (currentBV == bv)
+                currentBV.resetContent();
+            else
+                setCurrentActiveCanvas(bv);
+        });
+        fileMenu.getItems().addAll(clear);
+        menuBar.getMenus().addAll(fileMenu);
 
         mainHBox = new HBox();
 

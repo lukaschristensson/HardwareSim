@@ -51,6 +51,11 @@ public class Clock extends Component implements GeneratingComponent {
     }
 
     @Override
+    public void deactivate() {
+        this.enabled = false;
+    }
+
+    @Override
     public int getOutputSize() {
         return 1;
     }

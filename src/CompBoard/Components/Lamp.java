@@ -29,6 +29,11 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
     }
 
     @Override
+    public void deactivate() {
+        active = false;
+    }
+
+    @Override
     public int getOutputSize() {
         return out == null ? 0: 1;
     }
@@ -88,10 +93,14 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
     public String generate(boolean forced) {
         if (out != null && in != null)
             out.setState(in.getState(), forced);
+        if (out != null && in == null)
+            out.setState(0, forced);
         return getName() + " passed signal through it";
     }
     @Override
     public String generate() {
-        return generate(false);
+        if (active)
+            return generate(false);
+        return "";
     }
 }

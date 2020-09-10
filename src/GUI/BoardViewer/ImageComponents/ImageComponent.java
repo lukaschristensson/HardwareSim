@@ -183,17 +183,7 @@ public abstract class ImageComponent{
                         }));
                         return ((GeneratingComponent)parent.getComp()).addOutput(cable.l);
                     case INPUT:
-                        if(((ReactiveComponent)parent.getComp()).addInput(cable.l)) {
-                            EventWorker.addTriggerEvent((ps -> {
-                                if (ps != null)
-                                    ps.println(((ReactiveComponent)parent.getComp()).react());
-                                else
-                                    ((ReactiveComponent)parent.getComp()).react();
-                            }));
-                            cable.l.addChainedComp((ReactiveComponent) parent.getComp());
-                            return true;
-                        }
-                        return false;
+                        return ((ReactiveComponent) parent.getComp()).addInput(cable.l);
                     default:
                         return false;
                 }

@@ -2,6 +2,7 @@ package GUI.BoardViewer.ChipManipulator;
 
 import CompBoard.Components.*;
 import CompBoard.Components.Component;
+import EventWorker.EventWorker;
 import GUI.BoardViewer.BoardViewer;
 import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.BoardViewer.DrawContributer;
@@ -27,6 +28,7 @@ import javafx.stage.FileChooser;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -146,12 +148,18 @@ public class ChipCreator extends BoardViewer {
             String[] saveLines = chipSaveData.split("\n");
             StringBuilder sb = new StringBuilder();
             for (int i = 2; i < saveLines.length; i++) {
-                if (!saveLines[i].contains(" -> ")) {
+                if (!saveLines[i].contains(" -> ") && !saveLines[i].contains(" --> ")) {
                     saveLines[i] += "ch" + chipID;
-                } else{
-                    String c1 = saveLines[i].split(" -> ")[0];
-                    String c2 = saveLines[i].split(" -> ")[1];
-                    saveLines[i] = c1 + "ch" + chipID + " -> " + c2 + "ch" + chipID;
+                } else {
+                    if (saveLines[i].contains(" -> ")) {
+                        String c1 = saveLines[i].split(" -> ")[0];
+                        String c2 = saveLines[i].split(" -> ")[1];
+                        saveLines[i] = c1 + "ch" + chipID + " -> " + c2 + "ch" + chipID;
+                    } else{
+                        String c1 = saveLines[i].split(" --> ")[0];
+                        String c2 = saveLines[i].split(" --> ")[1];
+                        saveLines[i] = c1 + "ch" + chipID + " --> " + c2 + "ch" + chipID;
+                    }
                 }
                 sb.append(saveLines[i] +"\n");
             }
@@ -281,9 +289,13 @@ public class ChipCreator extends BoardViewer {
 
     public static ChipImageComponent loadChip(String saveString){
 
+        Integer timeSpacingConstant = 0;
+
         ArrayList<Component> reconstructedComponents = new ArrayList<>();
         ArrayList<Pass> reconstructedInputs = new ArrayList<>();
         ArrayList<Pass> reconstructedOutputs = new ArrayList<>();
+        ArrayList<Link> linksToRaise = new ArrayList<>();
+        ArrayList<Link> linksToSink = new ArrayList<>();
         List<String> rawLineInfo = Arrays.asList(saveString.split("\n"));
         String[] lineInfo = new String[rawLineInfo.size()];
 
@@ -294,7 +306,7 @@ public class ChipCreator extends BoardViewer {
         lineInfo[1] = rawLineInfo.get(1);
 
         for (String s: rawLineInfo.subList(2, rawLineInfo.size()))
-            if (s.contains(" -> "))
+            if (s.contains(" -> ") || s.contains(" --> "))
                 linkInf.add(s);
             else
                 compInf.add(s);
@@ -307,7 +319,7 @@ public class ChipCreator extends BoardViewer {
 
         for (int i = 2; i < lineInfo.length; i++){
             String info = lineInfo[i];
-            if (!info.contains(" -> ")) {
+            if (!info.contains(" -> ") && !info.contains(" --> ")) {
                 int numberID = Integer.MAX_VALUE;
 
                 try {
@@ -325,8 +337,12 @@ public class ChipCreator extends BoardViewer {
                     return null;
                 reconstructedComp.name = info;
                 reconstructedComponents.add(reconstructedComp);
-            } else if(info.contains(" -> ")){
-                String[] linkInfo = info.split(" -> ");
+            } else if(info.contains(" -> ") || info.contains(" --> ")){
+                String[] linkInfo;
+                if (info.contains(" -> "))
+                    linkInfo = info.split(" -> ");
+                else
+                    linkInfo = info.split(" --> ");
                 Link reconstructedLink = new Link();
                 Component comp1 = null;
                 Component comp2 = null;
@@ -343,17 +359,29 @@ public class ChipCreator extends BoardViewer {
                 }
 
                 if (linkInfo[0].startsWith("O")) {
-                    ((GeneratingComponent) comp1).addOutput(reconstructedLink);
+                    final GeneratingComponent comp1final = (GeneratingComponent) comp1;
+                    comp1final.addOutput(reconstructedLink);
                 } else
                     ((ReactiveComponent) comp1).addInput(reconstructedLink);
 
                 if (linkInfo[1].startsWith("O")) {
-                    ((GeneratingComponent) comp2).addOutput(reconstructedLink);
+                    final GeneratingComponent comp2final = (GeneratingComponent) comp2;
+                    comp2final.addOutput(reconstructedLink);
                 } else
                     ((ReactiveComponent) comp2).addInput(reconstructedLink);
+                if(info.contains(" --> "))
+                    linksToRaise.add(reconstructedLink);
+                else
+                    linksToSink.add(reconstructedLink);
             }
 
         }
+
+        for (Link l: linksToRaise)
+            l.setState(1, true);
+
+        for (Pass p: reconstructedInputs)
+            p.generate();
 
         ChipImageComponent cic = new ChipImageComponent(inputSize, outputSize);
         ArrayList<ImageComponent.CNode> inputNodes = new ArrayList<>();
@@ -364,10 +392,10 @@ public class ChipCreator extends BoardViewer {
         for (Pass p: reconstructedOutputs)
             outputNodes.add(new PassImageComponent(nodeOrbRad,nodeOrbBorderWidth, null, p).outputNodes[0]);
 
-        for (Pass p: reconstructedInputs)
-            p.generate(true);
         cic.setInputNodes(inputNodes.toArray(new ImageComponent.CNode[]{}));
         cic.setOutputNodes(outputNodes.toArray(new ImageComponent.CNode[]{}));
+
+        cic.setComps(reconstructedComponents);
 
         cic.calcDim();
 
@@ -395,16 +423,20 @@ public class ChipCreator extends BoardViewer {
             for (CableLink cl : cls)
                 saveString.append(
                         cl.getFrom().getType()).append(cl.getFrom().parent.getComp().getName())
-                        .append(" -> ")
+                        .append("" + (cl.l.getState().getAsBool()?" --> ": " -> "))
                         .append(cl.getTo().getType()).append(cl.getTo().parent.getComp().getName())
                         .append("\n");
             subChips.forEach(saveString::append);
             try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name + ".ch")) {
                 out.print(saveString);
             } catch (Exception e) {
-                e.printStackTrace();
+                Alert err = new Alert(Alert.AlertType.ERROR);
+                err.setTitle("Error");
+                err.setContentText("A non valid or name caused a problem, nothing was saved");
+                err.setHeaderText("Save failed");
+                err.showAndWait();
             }
-        } else{
+        } else  {
             Alert err = new Alert(Alert.AlertType.ERROR);
             err.setTitle("Error");
             err.setContentText("A non valid or name caused a problem, nothing was saved");
@@ -423,6 +455,7 @@ public class ChipCreator extends BoardViewer {
         chipID = 0;
         resetContent();
     }
+
     public void cancelAndExit(){
         cancelChip();
         MainWindow.setCurrentActiveCanvas(MainWindow.bv);

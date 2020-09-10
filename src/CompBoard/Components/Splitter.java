@@ -17,7 +17,7 @@ public class Splitter extends CalculatingComponent {
 
     @Override
     BinaryInt[] calculateForInput(BinaryInt[] inputs) {
-        return new BinaryInt[]{inputs[0],inputs[0],inputs[0]};
+        return new BinaryInt[]{inputs[0],inputs[0]};
     }
 
     @Override
@@ -42,15 +42,16 @@ public class Splitter extends CalculatingComponent {
 
     @Override
     public boolean setOutputs(Link[] out) {
+        if (out.length != 2)
+            return false;
         outputs = out;
         return true;
     }
 
     @Override
     public boolean addOutput(Link out) {
-        if (outputs[0] != null && outputs[1] != null)
+        if ((outputs[0] != null && outputs[1] != null) || outputs[0] == out || outputs[1] == out)
             return false;
-
         if (outputs[0] == null)
             outputs[0] = out;
         else
@@ -60,11 +61,12 @@ public class Splitter extends CalculatingComponent {
 
     @Override
     public boolean setInputs(Link[] in) {
+        if (in.length != 1 || this.inputs[0] != null)
+            return false;
         inputs = in;
-        if (in!= null)
-            for (Link l: in)
-                if (l!= null)
-                    l.addChainedComp(this);
+        for (Link l: in)
+            if (l!= null)
+                l.addChainedComp(this);
         return false;
     }
 

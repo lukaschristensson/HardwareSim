@@ -31,6 +31,11 @@ public class Lever extends Component implements GeneratingComponent {
     }
 
     @Override
+    public void deactivate() {
+        active = false;
+    }
+
+    @Override
     public int getOutputSize() {
         return 1;
     }
@@ -74,6 +79,9 @@ public class Lever extends Component implements GeneratingComponent {
     }
     @Override
     public String generate() {
-        return generate(false);
+        if (active)
+            return generate(false);
+        else
+            return "";
     }
 }

@@ -29,6 +29,11 @@ public class Button extends Component implements GeneratingComponent {
         return 'B';
     }
 
+    @Override
+    public void deactivate() {
+        active = false;
+    }
+
 
     @Override
     public int getOutputSize() {
@@ -66,7 +71,9 @@ public class Button extends Component implements GeneratingComponent {
 
     @Override
     public String generate() {
-        return generate(false);
+        if (active)
+            return generate(false);
+        return "";
     }
 
     @Override

@@ -14,9 +14,6 @@ public class NANDGate extends CalculatingComponent{
 
     @Override
     BinaryInt[] calculateForInput(BinaryInt[] inputs) {
-        if (inputs[0] == null || inputs[1] == null)
-            return new BinaryInt[]{new BinaryInt(0)};
-
         return new BinaryInt[]{new BinaryInt(
                 !(inputs[0].getAsBool() && inputs[1].getAsBool())
         )};
@@ -45,7 +42,9 @@ public class NANDGate extends CalculatingComponent{
 
     @Override
     public boolean setOutputs(Link[] out) {
-        this.outputs = out;
+        if (out.length != 1 || this.outputs[0] != null)
+            return false;
+        this.outputs[0] = out[0];
         return true;
     }
 
@@ -69,7 +68,7 @@ public class NANDGate extends CalculatingComponent{
 
     @Override
     public boolean addInput(Link in) {
-        if (inputs[0] != null && inputs[1] != null)
+        if ((inputs[0] != null && inputs[1] != null) || inputs[0] == in || inputs[1] == in)
             return false;
         in.addChainedComp(this);
         if (inputs[0] == null)

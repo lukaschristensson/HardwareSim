@@ -20,7 +20,18 @@ public class Link extends Observable {
     }
 
     public void addChainedComp(ReactiveComponent rc){
-        chainComponents.add(rc);
+        if (!chainComponents.contains(rc))
+            chainComponents.add(rc);
+    }
+
+    public boolean contains(Object obj){
+        if (obj instanceof ReactiveComponent)
+            return chainComponents.contains(obj);
+        if (obj instanceof Link)
+            for (ReactiveComponent rc: ((Link)obj).chainComponents)
+                if (contains(rc))
+                    return true;
+        return false;
     }
 
     public void setState(BinaryInt state){
@@ -30,6 +41,8 @@ public class Link extends Observable {
     public void setState(BinaryInt state, boolean forced) {
         if (!this.state.equals(state) || forced) {
             this.state = state;
+            setChanged();
+            notifyObservers(state.getAsBool());
             for (ReactiveComponent rc : chainComponents)
                 EventWorker.addTriggerEvent((ps) -> {
                     if (ps != null)
