@@ -75,13 +75,12 @@ public class Button extends Component implements GeneratingComponent {
             if (outputLink != null)
                 outputLink.setState(1, forced);
             currentlyDown = true;
-            if (!forced)
-                EventWorker.addTriggerEvent((ps)->{
-                    if (ps != null)
-                        ps.println(generate());
-                    else
-                        generate();
-                }, pulseLength);
+            EventWorker.addTriggerEvent((ps)->{
+                if (ps != null)
+                    ps.println(generate());
+                else
+                    generate();
+            }, pulseLength);
             setChanged();
             notifyObservers(currentlyDown);
             return getName() + " is now pressed down" + (outputLink == null? " but is disconnected": "");
