@@ -56,6 +56,15 @@ public class Lever extends Component implements GeneratingComponent {
         return true;
     }
 
+    @Override
+    public boolean removeOutput(Link l) {
+        if (outputLink == l){
+            outputLink = null;
+            return true;
+        }
+        return false;
+    }
+
     public boolean toggleOutput(){
         outputState = !outputState;
         EventWorker.addTriggerEvent((ps)->{

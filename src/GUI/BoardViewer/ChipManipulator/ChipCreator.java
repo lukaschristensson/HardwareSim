@@ -164,10 +164,16 @@ public class ChipCreator extends BoardViewer {
                 }
                 sb.append(saveLines[i] +"\n");
             }
-            subChips.add(sb.toString());
+            String saveStringMod = sb.toString();
+            subChips.add(saveStringMod);
             ics.add(ic);
             chipID++;
             update();
+            MainWindow.addUndo(()->{
+                ics.remove(ic);
+                subChips.remove(saveStringMod);
+                update();
+            });
         } else {
             ic.getComp().name = String.valueOf(ic.getComp().getCompChar()) + compID;
             compID++;
@@ -263,10 +269,8 @@ public class ChipCreator extends BoardViewer {
             if (res.isPresent()) {
                 MainWindow.setCurrentActiveCanvas(MainWindow.cc);
                 MainWindow.cc.startNewChip(res.get()[0], res.get()[1]);
-            }else
-                MainWindow.setCurrentActiveCanvas(MainWindow.bv);
+            }
         });
-        ;
         MenuItem loadChip = new MenuItem("Load a chip");
         loadChip.setOnAction(e ->{
             FileChooser fileChooser = new FileChooser();
@@ -466,6 +470,7 @@ public class ChipCreator extends BoardViewer {
         subChips = new ArrayList<>();
         currentChip = new ChipImageComponent(inNodes, outNodes);
         populateNodes();
+        MainWindow.clearUndoQueue();
         return true;
     }
 }

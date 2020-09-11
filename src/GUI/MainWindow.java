@@ -12,9 +12,12 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +33,9 @@ public class MainWindow extends Application {
     public static CableLinkEditor cle;
     public static Stage pStage;
 
+    private static UndoEvent[] undoQueue;
+    private static final Integer maxUndoQueueSize = 10;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -44,6 +50,12 @@ public class MainWindow extends Application {
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
+        MenuItem undo = new MenuItem("Undo (Alt+Z)");
+        undo.setOnAction(e->undo());
+        primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, (e)->{
+            if (e.getCode() == KeyCode.Z  && e.isControlDown())
+                undo();
+        });
         MenuItem clear = new MenuItem("Clear");
         clear.setOnAction(e->{
             if (currentBV == bv)
@@ -51,7 +63,7 @@ public class MainWindow extends Application {
             else
                 setCurrentActiveCanvas(bv);
         });
-        fileMenu.getItems().addAll(clear);
+        fileMenu.getItems().addAll(undo,clear);
         menuBar.getMenus().addAll(fileMenu);
 
         mainHBox = new HBox();
@@ -114,6 +126,37 @@ public class MainWindow extends Application {
         cle.switchBoardViewer(bv);
         Cursor.setCanvas(bv);
         bv.startUpdate();
+        clearUndoQueue();
+    }
+
+    public static void clearUndoQueue(){
+        undoQueue = new UndoEvent[maxUndoQueueSize];
+    }
+
+    public static void addUndo(UndoEvent u){
+        boolean inserted = false;
+        if (undoQueue == null)
+            undoQueue = new UndoEvent[maxUndoQueueSize];
+        for (int i = 0; i < maxUndoQueueSize; i++)
+            if (undoQueue[i] == null) {
+                undoQueue[i] = u;
+                inserted = true;
+            }
+        if (!inserted){
+            for(int i = 1; i < maxUndoQueueSize; i++)
+                undoQueue[i-1] = undoQueue[i];
+            undoQueue[maxUndoQueueSize - 1] = u;
+        }
+    }
+
+    public static void undo(){
+        boolean found = false;
+        for(int i = maxUndoQueueSize - 1; i >= 0; i--)
+            if (undoQueue[i] != null && !found){
+                undoQueue[i].undo();
+                undoQueue[i] = null;
+                found = true;
+            }
     }
 
     @Override

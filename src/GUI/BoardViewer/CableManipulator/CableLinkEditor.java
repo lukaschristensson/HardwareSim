@@ -3,6 +3,8 @@ package GUI.BoardViewer.CableManipulator;
 import GUI.BoardViewer.BoardViewer;
 import GUI.BoardViewer.DrawContributer;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
+import GUI.MainWindow;
+import GUI.UndoEvent;
 import UtilPackage.Cursor;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -105,8 +107,14 @@ public class CableLinkEditor extends VBox implements DrawContributer {
         else if (currentCable.path.size() != 0 && c == null)
             currentCable.addPoint(p);
         else if (currentCable.path.size() >= 1) {
-            if(currentCable.completePath(c)) {
-                boardViewer.addCable(currentCable);
+            UndoEvent ue = currentCable.completePath(c);
+            final CableLink finalCable = currentCable;
+            if(ue != null) {
+                boardViewer.addCable(finalCable);
+                MainWindow.addUndo(()->{
+                    ue.undo();
+                    boardViewer.removeCable(finalCable);
+                });
             }
             cancelDraw();
             boardViewer.update();

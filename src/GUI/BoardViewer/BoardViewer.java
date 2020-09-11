@@ -6,6 +6,7 @@ import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.BoardViewer.ChipManipulator.ChipImageComponent;
 import GUI.BoardViewer.ImageComponents.ClickableComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
+import GUI.MainWindow;
 import UtilPackage.Cursor;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
@@ -96,6 +97,11 @@ public class BoardViewer extends Canvas{
         ics.add(ic);
         board.addComponent(ic.getComp());
         update();
+        MainWindow.addUndo(()->{
+            ics.remove(ic);
+            board.removeComponent(ic.getComp());
+            update();
+        });
     }
     public boolean removeComponent(ImageComponent ic){
         if(ics.remove(ic)){
@@ -130,5 +136,9 @@ public class BoardViewer extends Canvas{
     public void clearCanvas(){
         getGraphicsContext2D().setFill(backgroundColor);
         getGraphicsContext2D().fillRect(0, 0, getWidth(), getHeight());
+    }
+
+    public boolean removeCable(CableLink cable) {
+        return cls.remove(cable);
     }
 }

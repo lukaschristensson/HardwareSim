@@ -60,6 +60,15 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
     }
 
     @Override
+    public boolean removeInput(Link l) {
+        if (in == l && l.removeChainedComp(this)){
+            in = null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean setOutputs(Link[] out) {
         this.out = out[0];
         return true;
@@ -71,6 +80,15 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
             return false;
         this.out = out;
         return true;
+    }
+
+    @Override
+    public boolean removeOutput(Link l) {
+        if (out == l){
+            out = null;
+            return true;
+        }
+        return false;
     }
 
 

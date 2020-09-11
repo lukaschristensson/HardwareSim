@@ -23,6 +23,9 @@ public class Link extends Observable {
         if (!chainComponents.contains(rc))
             chainComponents.add(rc);
     }
+    public boolean removeChainedComp(ReactiveComponent rc){
+        return chainComponents.remove(rc);
+    }
 
     public boolean contains(Object obj){
         if (obj instanceof ReactiveComponent)

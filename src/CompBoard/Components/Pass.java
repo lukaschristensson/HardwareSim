@@ -48,6 +48,15 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
     }
 
     @Override
+    public boolean removeOutput(Link l) {
+        if (out == l){
+            out = null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public int getInputSize() {
         return 1;
     }
@@ -68,6 +77,15 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
         this.in = in;
         this.in.addChainedComp(this);
         return true;
+    }
+
+    @Override
+    public boolean removeInput(Link l) {
+        if (in == l && l.removeChainedComp(this)){
+            in = null;
+            return true;
+        }
+        return false;
     }
 
     @Override

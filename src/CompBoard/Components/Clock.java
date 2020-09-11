@@ -75,6 +75,15 @@ public class Clock extends Component implements GeneratingComponent {
     }
 
     @Override
+    public boolean removeOutput(Link l) {
+        if (outLink == l){
+            outLink = null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public String generate() {
         return generate(false);
     }

@@ -16,6 +16,28 @@ public abstract class CalculatingComponent extends Component implements Reactive
     }
 
     @Override
+    public boolean removeInput(Link l) {
+        for (int i = 0; i < inputs.length; i++){
+            if (inputs[i] != null && inputs[i] == l && l.removeChainedComp(this)){
+                inputs[i] = null;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeOutput(Link l) {
+        for (int i = 0; i < outputs.length; i++){
+            if (outputs[i] != null && outputs[i] == l){
+                outputs[i] = null;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void deactivate() {
         active = false;
     }

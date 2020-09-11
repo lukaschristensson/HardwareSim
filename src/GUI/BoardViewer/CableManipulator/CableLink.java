@@ -1,7 +1,11 @@
 package GUI.BoardViewer.CableManipulator;
 
+import CompBoard.Components.GeneratingComponent;
 import CompBoard.Components.Link;
+import CompBoard.Components.ReactiveComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
+import GUI.MainWindow;
+import GUI.UndoEvent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -50,18 +54,30 @@ public class CableLink implements Observer {
             path.add(p);
     }
 
-    public boolean completePath(ImageComponent.CNode node){
+    public UndoEvent completePath(ImageComponent.CNode node){
         this.to = node;
         addPoint(node.getPosition());
         completed = true;
 
         if(from != to && to.setLink(this) && from.setLink(this)) {
             l.addObserver(this);
-            return true;
+            return ()->{
+                if (from.getType() == ImageComponent.NodeType.INPUT)
+                    ((ReactiveComponent)from.parent.getComp()).removeInput(l);
+                else
+                    ((GeneratingComponent)from.parent.getComp()).removeOutput(l);
+
+                if (to.getType() == ImageComponent.NodeType.INPUT)
+                    ((ReactiveComponent)to.parent.getComp()).removeInput(l);
+                else
+                    ((GeneratingComponent)to.parent.getComp()).removeOutput(l);
+                from.clearCable();
+                to.clearCable();
+            };
         } else {
             from.clearCable();
             to.clearCable();
-            return false;
+            return null;
         }
     }
 
