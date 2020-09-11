@@ -50,7 +50,7 @@ public class MainWindow extends Application {
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
-        MenuItem undo = new MenuItem("Undo (Alt+Z)");
+        MenuItem undo = new MenuItem("Undo (Ctrl+Z)");
         undo.setOnAction(e->undo());
         primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, (e)->{
             if (e.getCode() == KeyCode.Z  && e.isControlDown())
@@ -58,6 +58,7 @@ public class MainWindow extends Application {
         });
         MenuItem clear = new MenuItem("Clear");
         clear.setOnAction(e->{
+            clearUndoQueue();
             if (currentBV == bv)
                 currentBV.resetContent();
             else

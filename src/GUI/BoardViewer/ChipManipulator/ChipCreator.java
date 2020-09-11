@@ -304,7 +304,7 @@ public class ChipCreator extends BoardViewer {
     }
     private static void optimizeChips(String url){
         File f = new File(url);
-        if (!f.isDirectory()) {
+        if (!f.isDirectory() && f.getAbsolutePath().endsWith("ch")) {
             System.out.println(url);
             try (BufferedReader br = new BufferedReader(new FileReader(f))) {
                 String line;
@@ -322,7 +322,7 @@ public class ChipCreator extends BoardViewer {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } else {
+        } else if (f.isDirectory()) {
             File[] childFiles =  f.listFiles();
             if (childFiles != null)
                 for(File childF: childFiles){
@@ -331,6 +331,7 @@ public class ChipCreator extends BoardViewer {
         }
 
     }
+
 
     public static ChipImageComponent loadChip(String saveString){
 
@@ -487,40 +488,68 @@ public class ChipCreator extends BoardViewer {
 
     }
 
-    public static String cleanSaveString(String s){
+    public static String cleanSaveString(String s) {
         String[] lines = s.split("\n");
-        boolean clean = false;
-        while(!clean) {
-            clean = true;
-            ArrayList<Integer> linesWithPass = new ArrayList<>();
-            for (int i = 0; i < lines.length; i++)
-                if (lines[i].contains(String.valueOf(new Pass().getCompChar())) && (lines[i].contains(" -> ") || lines[i].contains(" -_> "))) {
-                    linesWithPass.add(i);
-                }
-            for (Integer index : linesWithPass) {
-                for (int i = 0; i < lines.length; i++)
-                    if (lines[i].contains(" ") && lines[index].contains(" ") && i != index) {
-                        if (lines[i].contains(lines[index].split(" ")[0]) || lines[i].contains(lines[index].split(" ")[2])) {
-                            String[] comps1 = lines[i].split(lines[i].contains(" --> ") ? " --> " : " -> ");
-                            String[] comps2 = lines[index].split(lines[index].contains(" --> ") ? " --> " : " -> ");
-                            if (comps1[0].equals(comps2[1])) {
-                                lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
-                                lines[index] = "";
-                                clean = false;
-                            } else if (comps1[1].equals(comps2[0])){
-                                lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
-                                lines[index] = "";
-                                clean = false;
-                            }
+        boolean clean;
+        String pChar = String.valueOf(new Pass().getCompChar());
+        clean = true;
+        ArrayList<Integer> linesWithPass = new ArrayList<>();
+        for (int i = 0; i < lines.length; i++)
+            if (lines[i].contains(pChar) && lines[i].contains(">")) {
+                linesWithPass.add(i);
+            }
+        for (Integer index : linesWithPass) {
+            for (int i = 0; i < lines.length; i++) {
+                if (!lines[i].isEmpty() && !lines[index].isEmpty() && i != index && lines[i].contains(">")) {
+                    if (lines[i].contains(lines[index].split(" ")[0].substring(1)) || lines[i].contains(lines[index].split(" ")[2].substring(1))) {
+
+                        String[] comps1 = lines[i].split((lines[i].contains(" --> ") ? " --> " : " -> "));
+                        String[] comps2 = lines[index].split((lines[index].contains(" --> ") ? " --> " : " -> "));
+
+                        if (comps1[0].substring(1).equals(comps2[0].substring(1)) &&
+                                comps1[0].contains(pChar) &&
+                                comps2[0].contains(pChar)) {
+                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1]);
+                            lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
+                            lines[index] = "";
+                            clean = false;
+                        } else if (comps1[0].substring(1).equals(comps2[1].substring(1)) &&
+                                comps1[0].contains(pChar) &&
+                                comps2[1].contains(pChar)) {
+                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0]);
+                            lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
+                            lines[index] = "";
+                            clean = false;
+                        } else if (comps1[1].substring(1).equals(comps2[0].substring(1)) &&
+                                comps1[1].contains(pChar) &&
+                                comps2[0].contains(pChar)) {
+                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1]);
+                            lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
+                            lines[index] = "";
+                            clean = false;
+                        } else if (comps1[1].substring(1).equals(comps2[1].substring(1)) &&
+                                comps1[1].contains(pChar) &&
+                                comps2[1].contains(pChar)) {
+                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0]);
+                            lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
+                            lines[index] = "";
+                            clean = false;
                         }
                     }
+                }
             }
         }
+
+
         StringBuilder sb = new StringBuilder();
-        for (String line: lines)
+        for (String line : lines)
             if (!line.equals(""))
                 sb.append(line).append("\n");
-        return sb.toString();
+
+        if (clean)
+            return sb.toString();
+        else
+            return cleanSaveString(sb.toString());
     }
 
     public void cancelChip(){
