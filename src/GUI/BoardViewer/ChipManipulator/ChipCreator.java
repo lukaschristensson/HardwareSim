@@ -24,6 +24,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
@@ -287,9 +288,48 @@ public class ChipCreator extends BoardViewer {
                 }catch (Exception exc){exc.printStackTrace();}
         });
 
+        MenuItem optimizeChip = new MenuItem("Optimize a chip(bring older chips up to date)");
+        optimizeChip.setOnAction(e-> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setInitialDirectory(new File(ImageLibrary.RES_URL));
+            File selectedFile = directoryChooser.showDialog(MainWindow.pStage);
+            if (selectedFile != null)
+                optimizeChips(selectedFile.getAbsolutePath());
+        });
+        chipMenu.getItems().addAll(optimizeChip);
+
         chipMenu.getItems().addAll(loadChip);
 
         return chipMenu;
+    }
+    private static void optimizeChips(String url){
+        File f = new File(url);
+        if (!f.isDirectory()) {
+            System.out.println(url);
+            try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+                String line;
+                StringBuilder sb = new StringBuilder();
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                String cleanSaveString = cleanSaveString(sb.toString());
+                br.close();
+                try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
+                    out.print(cleanSaveString);
+                } catch (Exception exc) {
+                    exc.printStackTrace();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            File[] childFiles =  f.listFiles();
+            if (childFiles != null)
+                for(File childF: childFiles){
+                    optimizeChips(childF.getAbsolutePath());
+            }
+        }
+
     }
 
     public static ChipImageComponent loadChip(String saveString){
@@ -425,9 +465,11 @@ public class ChipCreator extends BoardViewer {
                         .append("" + (cl.l.getState().getAsBool()?" --> ": " -> "))
                         .append(cl.getTo().getType()).append(cl.getTo().parent.getComp().getName())
                         .append("\n");
+
             subChips.forEach(saveString::append);
+            String cleanSaveString = cleanSaveString(saveString.toString());
             try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name + ".ch")) {
-                out.print(saveString);
+                out.print(cleanSaveString);
             } catch (Exception e) {
                 Alert err = new Alert(Alert.AlertType.ERROR);
                 err.setTitle("Error");
@@ -443,6 +485,42 @@ public class ChipCreator extends BoardViewer {
             err.showAndWait();
         }
 
+    }
+
+    public static String cleanSaveString(String s){
+        String[] lines = s.split("\n");
+        boolean clean = false;
+        while(!clean) {
+            clean = true;
+            ArrayList<Integer> linesWithPass = new ArrayList<>();
+            for (int i = 0; i < lines.length; i++)
+                if (lines[i].contains(String.valueOf(new Pass().getCompChar())) && (lines[i].contains(" -> ") || lines[i].contains(" -_> "))) {
+                    linesWithPass.add(i);
+                }
+            for (Integer index : linesWithPass) {
+                for (int i = 0; i < lines.length; i++)
+                    if (lines[i].contains(" ") && lines[index].contains(" ") && i != index) {
+                        if (lines[i].contains(lines[index].split(" ")[0]) || lines[i].contains(lines[index].split(" ")[2])) {
+                            String[] comps1 = lines[i].split(lines[i].contains(" --> ") ? " --> " : " -> ");
+                            String[] comps2 = lines[index].split(lines[index].contains(" --> ") ? " --> " : " -> ");
+                            if (comps1[0].equals(comps2[1])) {
+                                lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
+                                lines[index] = "";
+                                clean = false;
+                            } else if (comps1[1].equals(comps2[0])){
+                                lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
+                                lines[index] = "";
+                                clean = false;
+                            }
+                        }
+                    }
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String line: lines)
+            if (!line.equals(""))
+                sb.append(line).append("\n");
+        return sb.toString();
     }
 
     public void cancelChip(){

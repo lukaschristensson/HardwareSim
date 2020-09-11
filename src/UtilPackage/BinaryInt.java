@@ -1,9 +1,5 @@
 package UtilPackage;
 
-import CompBoard.Components.Component;
-
-import java.util.ArrayList;
-
 public class BinaryInt{
     private Integer state;
 
