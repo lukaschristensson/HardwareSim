@@ -333,7 +333,7 @@ public class ChipCreator extends BoardViewer {
     }
 
 
-    public static ChipImageComponent loadChip(String saveString){
+    public static ChipImageComponent loadChip(String saveString) {
 
         ArrayList<Component> reconstructedComponents = new ArrayList<>();
         ArrayList<Pass> reconstructedInputs = new ArrayList<>();
@@ -349,39 +349,39 @@ public class ChipCreator extends BoardViewer {
         lineInfo[0] = rawLineInfo.get(0);
         lineInfo[1] = rawLineInfo.get(1);
 
-        for (String s: rawLineInfo.subList(2, rawLineInfo.size()))
-            if (s.contains(" -> ") || s.contains(" --> "))
+        for (String s : rawLineInfo.subList(2, rawLineInfo.size()))
+            if (s.contains(">"))
                 linkInf.add(s);
             else
                 compInf.add(s);
 
         for (int i = 2; i < rawLineInfo.size(); i++)
-            lineInfo[i] = (i-2) < compInf.size() ?  compInf.get(i - 2) : linkInf.get((i-2) - compInf.size());
+            lineInfo[i] = (i - 2) < compInf.size() ? compInf.get(i - 2) : linkInf.get((i - 2) - compInf.size());
 
         int inputSize = Integer.parseInt(lineInfo[0]);
         int outputSize = Integer.parseInt(lineInfo[1]);
 
-        for (int i = 2; i < lineInfo.length; i++){
+        for (int i = 2; i < lineInfo.length; i++) {
             String info = lineInfo[i];
             if (!info.contains(" -> ") && !info.contains(" --> ")) {
                 int numberID = Integer.MAX_VALUE;
 
                 try {
                     numberID = Integer.parseInt(lineInfo[i].substring(1));
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
 
                 Component reconstructedComp = Component.getCompByChar(info.charAt(0));
                 if (numberID < inputSize && !lineInfo[i].contains("ch")) {
                     reconstructedInputs.add((Pass) reconstructedComp);
-                }
-                else if (numberID < inputSize + outputSize && !lineInfo[i].contains("ch")) {
+                } else if (numberID < inputSize + outputSize && !lineInfo[i].contains("ch")) {
                     reconstructedOutputs.add((Pass) reconstructedComp);
                 }
                 if (reconstructedComp == null)
                     return null;
                 reconstructedComp.name = info;
                 reconstructedComponents.add(reconstructedComp);
-            } else if(info.contains(" -> ") || info.contains(" --> ")){
+            } else if (info.contains(">")) {
                 String[] linkInfo;
                 if (info.contains(" -> "))
                     linkInfo = info.split(" -> ");
@@ -390,10 +390,10 @@ public class ChipCreator extends BoardViewer {
                 Link reconstructedLink = new Link();
                 Component comp1 = null;
                 Component comp2 = null;
-                for (Component c: reconstructedComponents)
+                for (Component c : reconstructedComponents)
                     if (c.name.equals(linkInfo[0].substring(1)))
                         comp1 = c;
-                for (Component c: reconstructedComponents)
+                for (Component c : reconstructedComponents)
                     if (c.name.equals(linkInfo[1].substring(1)))
                         comp2 = c;
                 if (comp1 == null || comp2 == null) {
@@ -407,13 +407,14 @@ public class ChipCreator extends BoardViewer {
                     comp1final.addOutput(reconstructedLink);
                 } else
                     ((ReactiveComponent) comp1).addInput(reconstructedLink);
-
                 if (linkInfo[1].startsWith("O")) {
                     final GeneratingComponent comp2final = (GeneratingComponent) comp2;
                     comp2final.addOutput(reconstructedLink);
                 } else
                     ((ReactiveComponent) comp2).addInput(reconstructedLink);
-                if(info.contains(" --> "))
+
+
+                if (info.contains(" --> "))
                     linksToRaise.add(reconstructedLink);
                 else
                     linksToSink.add(reconstructedLink);
@@ -421,16 +422,23 @@ public class ChipCreator extends BoardViewer {
 
         }
 
-        for (Link l: linksToRaise)
+        for (Link l : linksToRaise) {
             l.state = new BinaryInt(1);
+            l.forceNext();
+        }
+        for (Link l : linksToSink) {
+            l.forceNext();
+        }
+
+
         ChipImageComponent cic = new ChipImageComponent(inputSize, outputSize);
         ArrayList<ImageComponent.CNode> inputNodes = new ArrayList<>();
         ArrayList<ImageComponent.CNode> outputNodes = new ArrayList<>();
 
-        for (Pass p: reconstructedInputs)
-            inputNodes.add(new PassImageComponent(nodeOrbRad,nodeOrbBorderWidth, null, p).inputNodes[0]);
-        for (Pass p: reconstructedOutputs)
-            outputNodes.add(new PassImageComponent(nodeOrbRad,nodeOrbBorderWidth, null, p).outputNodes[0]);
+        for (Pass p : reconstructedInputs)
+            inputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).inputNodes[0]);
+        for (Pass p : reconstructedOutputs)
+            outputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).outputNodes[0]);
 
         cic.setInputNodes(inputNodes.toArray(new ImageComponent.CNode[]{}));
         cic.setOutputNodes(outputNodes.toArray(new ImageComponent.CNode[]{}));
@@ -509,28 +517,24 @@ public class ChipCreator extends BoardViewer {
                         if (comps1[0].substring(1).equals(comps2[0].substring(1)) &&
                                 comps1[0].contains(pChar) &&
                                 comps2[0].contains(pChar)) {
-                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1]);
                             lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[0].substring(1).equals(comps2[1].substring(1)) &&
                                 comps1[0].contains(pChar) &&
                                 comps2[1].contains(pChar)) {
-                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0]);
                             lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[1].substring(1).equals(comps2[0].substring(1)) &&
                                 comps1[1].contains(pChar) &&
                                 comps2[0].contains(pChar)) {
-                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1]);
                             lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[1].substring(1).equals(comps2[1].substring(1)) &&
                                 comps1[1].contains(pChar) &&
                                 comps2[1].contains(pChar)) {
-                            System.out.println(lines[i] + " : " + lines[index] + " replaced by " + comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0]);
                             lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
                             lines[index] = "";
                             clean = false;

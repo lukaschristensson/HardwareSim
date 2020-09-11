@@ -39,43 +39,4 @@ public class Splitter extends CalculatingComponent {
     public int getOutputSize() {
         return 2;
     }
-
-    @Override
-    public boolean setOutputs(Link[] out) {
-        if (out.length != 2)
-            return false;
-        outputs = out;
-        return true;
-    }
-
-    @Override
-    public boolean addOutput(Link out) {
-        if ((outputs[0] != null && outputs[1] != null) || outputs[0] == out || outputs[1] == out)
-            return false;
-        if (outputs[0] == null)
-            outputs[0] = out;
-        else
-            outputs[1] = out;
-        return true;
-    }
-
-    @Override
-    public boolean setInputs(Link[] in) {
-        if (in.length != 1 || this.inputs[0] != null)
-            return false;
-        inputs = in;
-        for (Link l: in)
-            if (l!= null)
-                l.addChainedComp(this);
-        return false;
-    }
-
-    @Override
-    public boolean addInput(Link in) {
-        if (inputs[0] != null)
-            return false;
-        inputs[0] = in;
-        in.addChainedComp(this);
-        return true;
-    }
 }

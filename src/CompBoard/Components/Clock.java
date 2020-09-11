@@ -12,7 +12,7 @@ public class Clock extends Component implements GeneratingComponent {
     private BinaryInt outputState;
 
     public Clock(){
-        this(500, 500);
+        this(200, 800);
     }
     public Clock(long onPreriod,long offPeriod){
         this(null,onPreriod,offPeriod);

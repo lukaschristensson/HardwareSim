@@ -38,44 +38,4 @@ public class NANDGate extends CalculatingComponent{
     public int getInputSize() {
         return 2;
     }
-
-
-    @Override
-    public boolean setOutputs(Link[] out) {
-        if (out.length != 1 || this.outputs[0] != null)
-            return false;
-        this.outputs[0] = out[0];
-        return true;
-    }
-
-    @Override
-    public boolean addOutput(Link out) {
-        if (outputs[0] != null)
-            return false;
-        outputs[0] = out;
-        return true;
-    }
-
-    @Override
-    public boolean setInputs(Link[] in) {
-        this.inputs = in;
-        if (in != null)
-            for (Link l: in)
-                if (l!= null)
-                    l.addChainedComp(this);
-        return true;
-    }
-
-    @Override
-    public boolean addInput(Link in) {
-        if ((inputs[0] != null && inputs[1] != null) || inputs[0] == in || inputs[1] == in)
-            return false;
-        in.addChainedComp(this);
-        if (inputs[0] == null)
-            inputs[0] = in;
-        else
-            inputs[1] = in;
-
-        return true;
-    }
 }

@@ -8,6 +8,7 @@ import java.util.Observable;
 
 public class Link extends Observable {
     public BinaryInt state;
+    private boolean forceNext = false;
     private ArrayList<ReactiveComponent> chainComponents;
 
     public Link(){
@@ -19,12 +20,20 @@ public class Link extends Observable {
         return state;
     }
 
+    public void forceNext(){
+        forceNext = true;
+    }
+
     public void addChainedComp(ReactiveComponent rc){
         if (!chainComponents.contains(rc))
             chainComponents.add(rc);
     }
     public boolean removeChainedComp(ReactiveComponent rc){
         return chainComponents.remove(rc);
+    }
+
+    public ArrayList<ReactiveComponent> getChainComponents() {
+        return chainComponents;
     }
 
     public boolean contains(Object obj){
@@ -42,7 +51,19 @@ public class Link extends Observable {
     }
 
     public void setState(BinaryInt state, boolean forced) {
-        if (!this.state.equals(state) || forced) {
+        if (forceNext) {
+            forceNext = false;
+            this.state = state;
+            setChanged();
+            notifyObservers(state.getAsBool());
+            for (ReactiveComponent rc : chainComponents)
+                EventWorker.addTriggerEvent((ps) -> {
+                    if (ps != null)
+                        ps.println(rc.react());
+                    else
+                        rc.react();
+                });
+        } else if (!this.state.equals(state) || forced) {
             this.state = state;
             setChanged();
             notifyObservers(state.getAsBool());
