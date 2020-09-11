@@ -1,6 +1,7 @@
 package CompBoard.Components;
 
 import EventWorker.EventWorker;
+import UtilPackage.BinaryInt;
 
 public class Pass extends Component implements GeneratingComponent, ReactiveComponent {
     Link out;
@@ -93,8 +94,6 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
     public String generate(boolean forced) {
         if (out != null && in != null)
             out.setState(in.getState(), forced);
-        if (out != null && in == null)
-            out.setState(1, forced);
         return getName() + " passed signal through";
     }
 }

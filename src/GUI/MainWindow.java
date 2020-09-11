@@ -83,7 +83,7 @@ public class MainWindow extends Application {
         cm.addMenuItem(cic);
 
 
-        EventWorker.setPrintStream(System.out);
+        //EventWorker.setPrintStream(System.out);
         SuperClock.addTimeDependant(new EventWorker());
 
         superClockTimer = new Timer();

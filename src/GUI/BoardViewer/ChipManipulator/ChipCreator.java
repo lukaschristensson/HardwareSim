@@ -8,6 +8,7 @@ import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.BoardViewer.DrawContributer;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import GUI.MainWindow;
+import UtilPackage.BinaryInt;
 import UtilPackage.Cursor;
 import UtilPackage.ImageLibrary;
 import javafx.animation.AnimationTimer;
@@ -289,8 +290,6 @@ public class ChipCreator extends BoardViewer {
 
     public static ChipImageComponent loadChip(String saveString){
 
-        Integer timeSpacingConstant = 0;
-
         ArrayList<Component> reconstructedComponents = new ArrayList<>();
         ArrayList<Pass> reconstructedInputs = new ArrayList<>();
         ArrayList<Pass> reconstructedOutputs = new ArrayList<>();
@@ -378,11 +377,7 @@ public class ChipCreator extends BoardViewer {
         }
 
         for (Link l: linksToRaise)
-            l.setState(1, true);
-
-        for (Pass p: reconstructedInputs)
-            p.generate();
-
+            l.state = new BinaryInt(1);
         ChipImageComponent cic = new ChipImageComponent(inputSize, outputSize);
         ArrayList<ImageComponent.CNode> inputNodes = new ArrayList<>();
         ArrayList<ImageComponent.CNode> outputNodes = new ArrayList<>();
@@ -407,7 +402,7 @@ public class ChipCreator extends BoardViewer {
 
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Name your chip");
-        dialog.setHeaderText("name: ");
+        dialog.setHeaderText("name ");
         dialog.setContentText("");
         Optional<String> nameVal = dialog.showAndWait();
         if (nameVal.isPresent() && nameVal.get().length() != 0) {

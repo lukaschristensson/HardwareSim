@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 
 public class Link extends Observable {
-    private BinaryInt state;
+    public BinaryInt state;
     private ArrayList<ReactiveComponent> chainComponents;
 
     public Link(){
