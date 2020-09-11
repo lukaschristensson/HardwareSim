@@ -33,7 +33,7 @@ public class EventWorker implements TimeDependant {
     @Override
     public void act(long now) {
         EventWorker.now = now;
-        if (LIST != null && LIST.time <= now) {
+        while (LIST != null && LIST.time <= now) {
             LIST.run(ps);
             LIST = LIST.next;
         }

@@ -435,8 +435,10 @@ public class ChipCreator extends BoardViewer {
         ArrayList<ImageComponent.CNode> inputNodes = new ArrayList<>();
         ArrayList<ImageComponent.CNode> outputNodes = new ArrayList<>();
 
-        for (Pass p : reconstructedInputs)
+        for (Pass p : reconstructedInputs) {
             inputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).inputNodes[0]);
+            p.generate(true);
+        }
         for (Pass p : reconstructedOutputs)
             outputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).outputNodes[0]);
 
