@@ -16,18 +16,23 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
+import javax.xml.soap.Text;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Array;
@@ -46,6 +51,11 @@ public class ChipCreator extends BoardViewer {
     private ArrayList<PassImageComponent> outNodes;
     private ChipImageComponent currentChip;
     private ArrayList<String> subChips;
+
+    private static int nodeOrbRad = 15;
+    private static int nodeOrbBorderWidth = 2;
+    private static int widthPadding = 30;
+    private static int heightPadding = 20;
 
     private static int compID = 0;
     private static int chipID = 0;
@@ -182,11 +192,6 @@ public class ChipCreator extends BoardViewer {
         }
     }
 
-    private static int nodeOrbRad = 15;
-    private static int nodeOrbBorderWidth = 2;
-    private static int widthPadding = 30;
-    private static int heightPadding = 20;
-
     private void populateNodes() {
         if (currentChip != null) {
             int distBetweenInNodes = (int) ((getHeight() - heightPadding * 2) / (currentChip.inputSize + 1));
@@ -284,7 +289,7 @@ public class ChipCreator extends BoardViewer {
                     while ((line = br.readLine()) != null) {
                         sb.append(line + "\n");
                     }
-                    Cursor.hold(loadChip(sb.toString()));
+                    Cursor.hold(loadChip(selectedFile.getName(), sb.toString()));
                 }catch (Exception exc){exc.printStackTrace();}
         });
 
@@ -302,6 +307,7 @@ public class ChipCreator extends BoardViewer {
 
         return chipMenu;
     }
+
     private static void optimizeChips(String url){
         File f = new File(url);
         if (!f.isDirectory() && f.getAbsolutePath().endsWith("ch")) {
@@ -333,7 +339,7 @@ public class ChipCreator extends BoardViewer {
     }
 
 
-    public static ChipImageComponent loadChip(String saveString) {
+    public static ChipImageComponent loadChip(String name, String saveString) {
 
         ArrayList<Component> reconstructedComponents = new ArrayList<>();
         ArrayList<Pass> reconstructedInputs = new ArrayList<>();
@@ -346,22 +352,36 @@ public class ChipCreator extends BoardViewer {
         ArrayList<String> linkInf = new ArrayList<>();
         ArrayList<String> compInf = new ArrayList<>();
 
-        lineInfo[0] = rawLineInfo.get(0);
-        lineInfo[1] = rawLineInfo.get(1);
 
-        for (String s : rawLineInfo.subList(2, rawLineInfo.size()))
+        if (rawLineInfo.get(0).startsWith("DESC:")) {
+            lineInfo[0] = rawLineInfo.get(0);
+            lineInfo[1] = rawLineInfo.get(1);
+            lineInfo[2] = rawLineInfo.get(2);
+        } else {
+            lineInfo[0] = rawLineInfo.get(0);
+            lineInfo[1] = rawLineInfo.get(1);
+        }
+
+        for (String s : rawLineInfo.subList(lineInfo[0].startsWith("DESC:") ? 3:2, rawLineInfo.size()))
             if (s.contains(">"))
                 linkInf.add(s);
             else
                 compInf.add(s);
 
-        for (int i = 2; i < rawLineInfo.size(); i++)
-            lineInfo[i] = (i - 2) < compInf.size() ? compInf.get(i - 2) : linkInf.get((i - 2) - compInf.size());
+        for (int i = lineInfo[0].startsWith("DESC:") ? 3:2; i < rawLineInfo.size(); i++)
+            lineInfo[i] = (i - (lineInfo[0].startsWith("DESC:") ? 3:2) < compInf.size() ? compInf.get(i - (lineInfo[0].startsWith("DESC:") ? 3:2)) : linkInf.get((i - (lineInfo[0].startsWith("DESC:") ? 3:2)) - compInf.size()));
 
-        int inputSize = Integer.parseInt(lineInfo[0]);
-        int outputSize = Integer.parseInt(lineInfo[1]);
+        int inputSize;
+        int outputSize;
+        if (lineInfo[0].startsWith("DESC:")){
+            inputSize = Integer.parseInt(lineInfo[1]);
+            outputSize = Integer.parseInt(lineInfo[2]);
+        } else {
+            inputSize = Integer.parseInt(lineInfo[0]);
+            outputSize = Integer.parseInt(lineInfo[1]);
+        }
 
-        for (int i = 2; i < lineInfo.length; i++) {
+        for (int i = (lineInfo[0].startsWith("DESC:") ? 3:2); i < lineInfo.length; i++) {
             String info = lineInfo[i];
             if (!info.contains(" -> ") && !info.contains(" --> ")) {
                 int numberID = Integer.MAX_VALUE;
@@ -435,6 +455,10 @@ public class ChipCreator extends BoardViewer {
         ArrayList<ImageComponent.CNode> inputNodes = new ArrayList<>();
         ArrayList<ImageComponent.CNode> outputNodes = new ArrayList<>();
 
+        if (lineInfo[0].startsWith("DESC:"))
+            cic.description = lineInfo[0].substring(5).split("\\|");
+        cic.chipName = name;
+
         for (Pass p : reconstructedInputs) {
             inputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).inputNodes[0]);
             p.generate(true);
@@ -448,22 +472,100 @@ public class ChipCreator extends BoardViewer {
         cic.setComps(reconstructedComponents);
 
         cic.calcDim();
-
         return cic.setSaveData(saveString);
     }
 
     private void saveChip(){
         StringBuilder saveString = new StringBuilder();
 
-        TextInputDialog dialog = new TextInputDialog();
+        javafx.scene.control.Dialog<String[]> dialog = new Dialog<>();
+        DialogPane dp = dialog.getDialogPane();
+
+        dp.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
         dialog.setTitle("Name your chip");
-        dialog.setHeaderText("name ");
-        dialog.setContentText("");
-        Optional<String> nameVal = dialog.showAndWait();
-        if (nameVal.isPresent() && nameVal.get().length() != 0) {
+        VBox left = new VBox(10);
+        VBox right = new VBox(10);
 
-            String name = nameVal.get();
+        ArrayList<TextField> inFields = new ArrayList<>();
 
+        for (int i = 0; i < currentChip.inputSize; i++){
+            HBox inName = new HBox(5);
+            TextField nameTF = new TextField();
+            nameTF.setPrefWidth(40);
+            nameTF.textProperty().addListener((a)->{
+                if (nameTF.getText().length() > 3)
+                    nameTF.setText(nameTF.getText(0, 3));
+            });
+            Label nameL = new Label("in " + i);
+
+            inName.setAlignment(Pos.CENTER_LEFT);
+
+            inName.getChildren().addAll(nameL, nameTF);
+            left.getChildren().addAll(inName);
+            inFields.add(nameTF);
+        }
+
+        ArrayList<TextField> outFields = new ArrayList<>();
+
+        for (int i = 0; i < currentChip.outputSize; i++){
+            HBox outName = new HBox(5);
+            TextField nameTF = new TextField();
+            nameTF.setPrefWidth(40);
+            nameTF.textProperty().addListener((a)->{
+                if (nameTF.getText().length() > 3)
+                    nameTF.setText(nameTF.getText(0, 3));
+            });
+            Label nameL = new Label("out " + i);
+
+            outName.setAlignment(Pos.CENTER_RIGHT);
+
+            outName.getChildren().addAll(nameTF, nameL);
+            right.getChildren().addAll(outName);
+            outFields.add(nameTF);
+        }
+
+        Label chipNameL = new Label("Name: ");
+        TextField chipNameTF = new TextField();
+        chipNameTF.setPrefWidth(80);
+        HBox chipName = new HBox(10);
+        chipName.setAlignment(Pos.CENTER);
+        chipName.getChildren().addAll(chipNameL, chipNameTF);
+
+        HBox.setHgrow(left, Priority.ALWAYS);
+        HBox.setHgrow(right, Priority.ALWAYS);
+
+        left.setAlignment(Pos.TOP_LEFT);
+        right.setAlignment(Pos.TOP_RIGHT);
+
+        HBox inoutnames = new HBox();
+        inoutnames.getChildren().addAll(left, right);
+
+        VBox mainVBox = new VBox(30);
+        mainVBox.getChildren().addAll(chipName, inoutnames);
+
+        dp.setContent(mainVBox);
+
+        dialog.setResultConverter(b->{
+            if(b.getButtonData().equals(ButtonType.OK.getButtonData())){
+                StringBuilder sb = new StringBuilder();
+                sb.append("DESC:");
+                for (TextField tf: inFields)
+                    sb.append(tf.getText() + "|");
+                for (TextField tf: outFields)
+                    sb.append(tf.getText() + "|");
+                String descString = sb.toString().substring(0, sb.length() - 2);
+                return new String[]{chipNameTF.getText(), descString};
+            }
+            return null;
+        });
+
+        Optional<String[]> ans = dialog.showAndWait();
+
+        if (ans.isPresent() && !ans.get()[0].isEmpty()) {
+            String name = ans.get()[0];
+
+            saveString.append(ans.get()[1] + "\n");
             saveString.append(currentChip.inputSize + "\n");
             saveString.append(currentChip.outputSize + "\n");
 
@@ -504,12 +606,12 @@ public class ChipCreator extends BoardViewer {
         String pChar = String.valueOf(new Pass().getCompChar());
         clean = true;
         ArrayList<Integer> linesWithPass = new ArrayList<>();
-        for (int i = 0; i < lines.length; i++)
+        for (int i = lines[0].startsWith("DESC:")?1:0; i < lines.length; i++)
             if (lines[i].contains(pChar) && lines[i].contains(">")) {
                 linesWithPass.add(i);
             }
         for (Integer index : linesWithPass) {
-            for (int i = 0; i < lines.length; i++) {
+            for (int i = lines[0].startsWith("DESC:")?1:0; i < lines.length; i++) {
                 if (!lines[i].isEmpty() && !lines[index].isEmpty() && i != index && lines[i].contains(">")) {
                     if (lines[i].contains(lines[index].split(" ")[0].substring(1)) || lines[i].contains(lines[index].split(" ")[2].substring(1))) {
 

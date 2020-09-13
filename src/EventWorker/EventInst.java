@@ -42,7 +42,10 @@ public class EventInst {
     }
 
     public void run(PrintStream ps){
-        ets.forEach(e -> e.trigger(ps));
+        ets.forEach(e -> {
+            if (e != null)
+                e.trigger(ps);
+        });
 
     }
 }

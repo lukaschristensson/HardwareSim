@@ -1,5 +1,6 @@
 package GUI.BoardViewer.ImageComponents;
 
+import CompBoard.Components.Clock;
 import CompBoard.Components.Component;
 import CompBoard.Components.GeneratingComponent;
 import CompBoard.Components.ReactiveComponent;
@@ -175,12 +176,13 @@ public abstract class ImageComponent{
                 this.cable = cb;
                 switch (type) {
                     case OUTPUT:
-                        EventWorker.addTriggerEvent((ps -> {
-                            if (ps != null)
-                                ps.println(((GeneratingComponent)parent.getComp()).generate(true));
-                            else
-                                ((GeneratingComponent)parent.getComp()).generate(true);
-                        }));
+                        if (!(parent.getComp() instanceof Clock))
+                            EventWorker.addTriggerEvent((ps -> {
+                                if (ps != null)
+                                    ps.println(((GeneratingComponent)parent.getComp()).generate(true));
+                                else
+                                    ((GeneratingComponent)parent.getComp()).generate(true);
+                            }));
                         return ((GeneratingComponent)parent.getComp()).addOutput(cable.l);
                     case INPUT:
                         return ((ReactiveComponent) parent.getComp()).addInput(cable.l);

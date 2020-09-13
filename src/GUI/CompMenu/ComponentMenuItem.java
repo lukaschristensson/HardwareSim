@@ -2,6 +2,7 @@ package GUI.CompMenu;
 
 
 import GUI.BoardViewer.ImageComponents.ImageComponent;
+import GUI.MainWindow;
 import UtilPackage.Cursor;
 import UtilPackage.ImageLibrary;
 import javafx.event.EventHandler;
@@ -29,6 +30,7 @@ public abstract class ComponentMenuItem extends Button {
     private EventHandler<MouseEvent> getMouseOnClickEvent() {
         return (e) -> {
             if (e.getButton().equals(MouseButton.PRIMARY)){
+                MainWindow.cle.cancelDraw();
                 UtilPackage.Cursor.setCursor(javafx.scene.Cursor.CLOSED_HAND);
                 //UtilPackage.Cursor.setCursorImage(ImageLibrary.getImage(getImageComp().getImages()[0]));
                 Cursor.hold(getImageComp().getEmptyCopy());

@@ -110,10 +110,8 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
 
     @Override
     public String generate(boolean forced) {
-        if (out != null && in != null)
-            out.setState(in.getState(), forced);
-        if (out != null && in == null)
-            out.setState(0, forced);
+        if (out != null)
+            out.setState(in == null? new BinaryInt(0) : in.getState(), forced);
         return getName() + " passed signal through";
     }
 }

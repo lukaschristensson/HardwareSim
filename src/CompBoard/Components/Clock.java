@@ -22,7 +22,11 @@ public class Clock extends Component implements GeneratingComponent {
         this.onPeriod = onPeriod;
         this.offPeriod = offPeriod;
         outputState = new BinaryInt(0);
-
+        EventWorker.addTriggerEvent(ps->{
+            if (ps != null)
+                ps.println(generate());
+            else generate();
+        });
     }
 
     public void toggleActive(){
