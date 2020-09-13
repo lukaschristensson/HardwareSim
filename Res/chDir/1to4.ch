@@ -1,0 +1,17 @@
+1
+4
+P0
+P1
+P2
+P3
+P4
+E5
+E6
+E7
+OP0 -> IE7
+OE7 -> IE5
+OE7 -> IE6
+OE6 -> IP4
+OE5 -> IP2
+IP3 -> OE6
+OE5 -> IP1

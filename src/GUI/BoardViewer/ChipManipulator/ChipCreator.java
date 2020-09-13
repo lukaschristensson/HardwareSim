@@ -2,7 +2,6 @@ package GUI.BoardViewer.ChipManipulator;
 
 import CompBoard.Components.*;
 import CompBoard.Components.Component;
-import EventWorker.EventWorker;
 import GUI.BoardViewer.BoardViewer;
 import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.BoardViewer.DrawContributer;
@@ -20,7 +19,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -31,19 +29,16 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
-import javax.swing.*;
-import javax.xml.soap.Text;
 import java.awt.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class ChipCreator extends BoardViewer {
-    public final static Integer maxInputs = 12;
-    public final static Integer maxOutputs = 12;
+    public final static Integer maxInputs = 16;
+    public final static Integer maxOutputs = 16;
     public final static String chipDir = "chDir";
 
     private boolean running = false;
@@ -487,6 +482,7 @@ public class ChipCreator extends BoardViewer {
         VBox left = new VBox(10);
         VBox right = new VBox(10);
 
+        /*
         ArrayList<TextField> inFields = new ArrayList<>();
 
         for (int i = 0; i < currentChip.inputSize; i++){
@@ -524,6 +520,7 @@ public class ChipCreator extends BoardViewer {
             right.getChildren().addAll(outName);
             outFields.add(nameTF);
         }
+         */
 
         Label chipNameL = new Label("Name: ");
         TextField chipNameTF = new TextField();
@@ -546,16 +543,21 @@ public class ChipCreator extends BoardViewer {
 
         dp.setContent(mainVBox);
 
+
         dialog.setResultConverter(b->{
             if(b.getButtonData().equals(ButtonType.OK.getButtonData())){
                 StringBuilder sb = new StringBuilder();
+                /*
                 sb.append("DESC:");
+
                 for (TextField tf: inFields)
                     sb.append(tf.getText() + "|");
                 for (TextField tf: outFields)
                     sb.append(tf.getText() + "|");
-                String descString = sb.toString().substring(0, sb.length() - 2);
+                String descString = sb.toString().substring(0, sb.toString().length() - 1);
                 return new String[]{chipNameTF.getText(), descString};
+                 */
+                return new String[]{chipNameTF.getText()};
             }
             return null;
         });
@@ -564,8 +566,9 @@ public class ChipCreator extends BoardViewer {
 
         if (ans.isPresent() && !ans.get()[0].isEmpty()) {
             String name = ans.get()[0];
-
+            /*
             saveString.append(ans.get()[1] + "\n");
+             */
             saveString.append(currentChip.inputSize + "\n");
             saveString.append(currentChip.outputSize + "\n");
 

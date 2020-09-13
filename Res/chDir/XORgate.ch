@@ -1,0 +1,24 @@
+2
+1
+P0
+P1
+P2
+N3
+N4
+E5
+E6
+E7
+N8
+N9
+IE5 --> ON3
+IE7 -> OP1
+OE7 -> IN3
+IN3 -> OE6
+OP0 -> IE6
+OE7 -> IN8
+OE6 -> IN4
+OE5 --> IN4
+OE5 --> IN8
+ON4 --> IN9
+ON8 --> IN9
+ON9 -> IP2

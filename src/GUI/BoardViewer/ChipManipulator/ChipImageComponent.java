@@ -132,7 +132,7 @@ public class ChipImageComponent extends ImageComponent implements ClickableCompo
                         "-fx-border-width: 3;");
                 if (i < inputSize) {
                     left.getChildren().addAll(inLabel);
-                }else {
+                } else {
                     right.getChildren().addAll(inLabel);
                 }
         }

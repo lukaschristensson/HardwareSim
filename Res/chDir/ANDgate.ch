@@ -1,0 +1,16 @@
+2
+1
+P0
+P1
+P2
+N3
+OP1 -> IN3
+IN3 -> OP0
+P0ch0
+P1ch0
+N2ch0
+E3ch0
+IE3ch0 -> ON3
+OE3ch0 -> IN2ch0
+OE3ch0 -> IN2ch0
+ON2ch0 --> IP2
