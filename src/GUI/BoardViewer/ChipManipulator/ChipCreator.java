@@ -154,7 +154,7 @@ public class ChipCreator extends BoardViewer {
             String chipSaveData = ((ChipImageComponent) ic).getSaveData();
             String[] saveLines = chipSaveData.split("\n");
             StringBuilder sb = new StringBuilder();
-            for (int i = 2; i < saveLines.length; i++) {
+            for (int i = saveLines[0].contains("DESC:")? 3:2; i < saveLines.length; i++) {
                 if (!saveLines[i].contains(" -> ") && !saveLines[i].contains(" --> ")) {
                     saveLines[i] += "ch" + chipID;
                 } else {
@@ -162,7 +162,7 @@ public class ChipCreator extends BoardViewer {
                         String c1 = saveLines[i].split(" -> ")[0];
                         String c2 = saveLines[i].split(" -> ")[1];
                         saveLines[i] = c1 + "ch" + chipID + " -> " + c2 + "ch" + chipID;
-                    } else{
+                    } else {
                         String c1 = saveLines[i].split(" --> ")[0];
                         String c2 = saveLines[i].split(" --> ")[1];
                         saveLines[i] = c1 + "ch" + chipID + " --> " + c2 + "ch" + chipID;
@@ -333,7 +333,6 @@ public class ChipCreator extends BoardViewer {
 
     }
 
-
     public static ChipImageComponent loadChip(String name, String saveString) {
 
         ArrayList<Component> reconstructedComponents = new ArrayList<>();
@@ -383,8 +382,7 @@ public class ChipCreator extends BoardViewer {
 
                 try {
                     numberID = Integer.parseInt(lineInfo[i].substring(1));
-                } catch (Exception e) {
-                }
+                } catch (Exception e) {}
 
                 Component reconstructedComp = Component.getCompByChar(info.charAt(0));
                 if (numberID < inputSize && !lineInfo[i].contains("ch")) {
@@ -482,7 +480,6 @@ public class ChipCreator extends BoardViewer {
         VBox left = new VBox(10);
         VBox right = new VBox(10);
 
-        /*
         ArrayList<TextField> inFields = new ArrayList<>();
 
         for (int i = 0; i < currentChip.inputSize; i++){
@@ -520,7 +517,6 @@ public class ChipCreator extends BoardViewer {
             right.getChildren().addAll(outName);
             outFields.add(nameTF);
         }
-         */
 
         Label chipNameL = new Label("Name: ");
         TextField chipNameTF = new TextField();
@@ -547,7 +543,6 @@ public class ChipCreator extends BoardViewer {
         dialog.setResultConverter(b->{
             if(b.getButtonData().equals(ButtonType.OK.getButtonData())){
                 StringBuilder sb = new StringBuilder();
-                /*
                 sb.append("DESC:");
 
                 for (TextField tf: inFields)
@@ -556,8 +551,6 @@ public class ChipCreator extends BoardViewer {
                     sb.append(tf.getText() + "|");
                 String descString = sb.toString().substring(0, sb.toString().length() - 1);
                 return new String[]{chipNameTF.getText(), descString};
-                 */
-                return new String[]{chipNameTF.getText()};
             }
             return null;
         });
@@ -566,9 +559,7 @@ public class ChipCreator extends BoardViewer {
 
         if (ans.isPresent() && !ans.get()[0].isEmpty()) {
             String name = ans.get()[0];
-            /*
             saveString.append(ans.get()[1] + "\n");
-             */
             saveString.append(currentChip.inputSize + "\n");
             saveString.append(currentChip.outputSize + "\n");
 
@@ -583,6 +574,7 @@ public class ChipCreator extends BoardViewer {
                         .append("\n");
 
             subChips.forEach(saveString::append);
+
             String cleanSaveString = cleanSaveString(saveString.toString());
             try (PrintWriter out = new PrintWriter(ImageLibrary.RES_URL + ImageLibrary.ESCAPE_CHAR + chipDir + ImageLibrary.ESCAPE_CHAR + name + ".ch")) {
                 out.print(cleanSaveString);
