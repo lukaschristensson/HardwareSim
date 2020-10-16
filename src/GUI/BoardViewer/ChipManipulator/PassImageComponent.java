@@ -1,5 +1,6 @@
 package GUI.BoardViewer.ChipManipulator;
 
+import CompBoard.Components.Component;
 import CompBoard.Components.Pass;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
 import javafx.scene.canvas.GraphicsContext;
@@ -8,6 +9,7 @@ import javafx.scene.paint.Color;
 import java.awt.*;
 
 public class PassImageComponent extends ImageComponent{
+    private Pass pass;
     public boolean drawInputs = true;
     public boolean drawOutputs = true;
     private Integer borderWidth;
@@ -18,7 +20,7 @@ public class PassImageComponent extends ImageComponent{
 
     public PassImageComponent(Integer radius, Integer borderWidth, Point pos, Pass pass) {
         super(pos, new Dimension(radius*2, radius*2));
-        this.comp = pass;
+        this.pass = pass;
         this.borderWidth = borderWidth;
         recalculateNodes();
     }
@@ -45,6 +47,16 @@ public class PassImageComponent extends ImageComponent{
             inputNodes[0].drawSelf(gc, INPUT_NODE_COLOR);
         if (pos != null && drawOutputs)
             outputNodes[0].drawSelf(gc, OUTPUT_NODE_COLOR);
+    }
+
+    @Override
+    public Component getComp() {
+        return pass;
+    }
+
+    @Override
+    public void forceGenerate() {
+        pass.generate();
     }
 
     @Override

@@ -14,6 +14,8 @@ public class NANDGate extends CalculatingComponent{
 
     @Override
     BinaryInt[] calculateForInput(BinaryInt[] inputs) {
+        if (inputs[0] == null || inputs[1] == null)
+            return new BinaryInt[]{new BinaryInt(1)};
         return new BinaryInt[]{new BinaryInt(
                 !(inputs[0].getAsBool() && inputs[1].getAsBool())
         )};

@@ -22,22 +22,17 @@ public class Clock extends Component implements GeneratingComponent {
         this.onPeriod = onPeriod;
         this.offPeriod = offPeriod;
         outputState = new BinaryInt(0);
-        EventWorker.addTriggerEvent(ps->{
-            if (ps != null)
-                ps.println(generate());
-            else generate();
-        });
+        generate();
+    }
+
+    void forceGenerate(){
+        if (outLink != null)
+            outLink.setState(outputState);
     }
 
     public void toggleActive(){
         enabled = !enabled;
-        if (enabled)
-            EventWorker.addTriggerEvent((ps) -> {
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            });
+        generate();
     }
 
     public void setName(String name) {
@@ -88,35 +83,14 @@ public class Clock extends Component implements GeneratingComponent {
     }
 
     @Override
-    public String generate() {
-        return generate(false);
-    }
-
-    @Override
-    public String generate(boolean forced) {
-        if (!enabled)
-            return getName() + " quarried but disabled";
-
-        if (outLink == null && !forced){
-            EventWorker.addTriggerEvent((ps)->{
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            }, outputState.getAsBool() ? onPeriod : offPeriod);
-            return ""; //getName() + " quarried but disconnected";
+    public void generate() {
+        if (enabled) {
+            outputState = outputState.inverse();
+            if (outLink!= null)
+                outLink.setState(outputState);
+            EventWorker.addTriggerEvent(this::generate, outputState.getAsBool() ? onPeriod : offPeriod);
+            setChanged();
+            notifyObservers(outputState);
         }
-
-        outputState = outputState.inverse();
-        outLink.setState(outputState, forced);
-        EventWorker.addTriggerEvent((ps)->{
-            if (ps != null)
-                ps.println(generate());
-            else
-                generate();
-        }, outputState.getAsBool() ? onPeriod : offPeriod);
-        setChanged();
-        notifyObservers(outputState);
-        return getName() + " flipped to " + outputState + ", event to switch state queued";
     }
 }

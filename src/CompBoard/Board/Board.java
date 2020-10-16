@@ -10,6 +10,8 @@ public class Board {
         components = new ArrayList<>();
     }
     public boolean addComponent(Component c){
+        if (components.contains(c))
+            return false;
         components.add(c);
         return true;
     }

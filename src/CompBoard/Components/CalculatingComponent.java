@@ -43,41 +43,19 @@ public abstract class CalculatingComponent extends Component implements Reactive
     }
 
     @Override
-    public String generate() {
-        if (active)
-            return generate(false);
-        return "";
-    }
+    public void generate() {
+        if (active) {
+            BinaryInt[] ins = new BinaryInt[inputs.length];
+            for (int i = 0; i < inputs.length; i++)
+                if (inputs[i] != null)
+                    ins[i] = inputs[i].getState();
 
-    @Override
-    public final String generate(boolean forced) {
-        BinaryInt[] ins = new BinaryInt[inputs.length];
-        for (int i = 0; i < inputs.length; i++)
-            if (inputs[i] != null)
-                ins[i] = inputs[i].getState();
-            else
-                return getName() + " was quarried but isn't plugged in";
-
-        BinaryInt[] results = calculateForInput(ins);
-        for (int i = 0; i < outputs.length; i++) {
-            if(outputs[i] != null && results[i] != null) // && !containsAhead(outputs, i))
-                outputs[i].setState(results[i], forced);
-            else
-                return "";
+            BinaryInt[] results = calculateForInput(ins);
+            for (int i = 0; i < outputs.length; i++) {
+                if (outputs[i] != null && results[i] != null) // && !containsAhead(outputs, i))
+                    outputs[i].setState(results[i]);
+            }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(getName() + " calculated inputs [.");
-        for (BinaryInt bi: ins)
-            sb.append(bi + ".");
-        sb.append("] -> [.");
-        for (BinaryInt bi: results)
-            sb.append(bi + ".");
-        sb.append("] and out it in the outputs  " +
-                ((Component)outputs[0].getChainComponents().get(0)).getName() +
-                (outputs.length > 1? "::" +
-                        ((Component)outputs[1].getChainComponents().get(0)).getName():
-                        ""));
-        return sb.toString();
     }
 
     private static boolean containsAhead(Link[] list, int index){
@@ -91,14 +69,8 @@ public abstract class CalculatingComponent extends Component implements Reactive
     }
 
     @Override
-    public final String react() {
-        EventWorker.addTriggerEvent((ps)->{
-            if (ps != null)
-                ps.println(generate());
-            else
-                generate();
-        });
-        return getName() + " recieved react request and generation has been queued";
+    public final void react() {
+        EventWorker.addTriggerEvent(this::generate);
     }
 
 

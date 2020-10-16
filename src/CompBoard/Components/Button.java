@@ -6,6 +6,7 @@ public class Button extends Component implements GeneratingComponent {
     private Link outputLink;
     private long pulseLength;
     private boolean currentlyDown;
+    private boolean pressQueued = false;
 
     public Button(Link out, long pulseLength){
         this.pulseLength = pulseLength;
@@ -49,6 +50,12 @@ public class Button extends Component implements GeneratingComponent {
         return false;
     }
 
+    public void ghostGenerate(){
+        if (outputLink != null){
+            outputLink.setState(currentlyDown);
+        }
+    }
+
     @Override
     public boolean addOutput(Link out) {
         if (outputLink != null)
@@ -66,47 +73,25 @@ public class Button extends Component implements GeneratingComponent {
         return false;
     }
 
-    public boolean press(){
-        if (currentlyDown)
-            return false;
-        EventWorker.addTriggerEvent((ps)->{
-            if (ps != null)
-                ps.println(generate());
-            else
-                generate();
-        });
-        return true;
-    }
-
-    @Override
-    public String generate() {
-        if (active)
-            return generate(false);
-        return "";
-    }
-
-    @Override
-    public String generate(boolean forced) {
-        if (!currentlyDown) {
-            if (outputLink != null)
-                outputLink.setState(1, forced);
-            currentlyDown = true;
-            EventWorker.addTriggerEvent((ps)->{
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            }, pulseLength);
-            setChanged();
-            notifyObservers(currentlyDown);
-            return getName() + " is now pressed down" + (outputLink == null? " but is disconnected": "");
-        } else {
-            if (outputLink != null)
-                outputLink.setState(0, forced);
-            currentlyDown = false;
-            setChanged();
-            notifyObservers(currentlyDown);
-            return getName() + " is now released" + (outputLink == null? " but is disconnected": "");
+    public void press(){
+        if (!currentlyDown && !pressQueued) {
+            pressQueued = true;
+            EventWorker.addTriggerEvent(this::generate);
         }
+    }
+
+    @Override
+    public void generate() {
+        pressQueued = false;
+        currentlyDown = !currentlyDown;
+        if (active)
+            if (currentlyDown) {
+                if (outputLink != null)
+                    outputLink.setState(1);
+                EventWorker.addTriggerEvent(this::generate, pulseLength);
+            } else {
+                if (outputLink != null)
+                    outputLink.setState(0);
+            }
     }
 }

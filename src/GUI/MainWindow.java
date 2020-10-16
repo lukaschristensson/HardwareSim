@@ -18,12 +18,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class MainWindow extends Application {
 
-    private Timer superClockTimer;
     public static BoardViewer currentBV;
     public static VBox mainVBox;
     public static HBox mainHBox;
@@ -95,17 +91,11 @@ public class MainWindow extends Application {
         cic.toggleActive();
         cm.addMenuItem(cic);
 
-
-        //EventWorker.setPrintStream(System.out);
         SuperClock.addTimeDependant(new EventWorker());
 
-        superClockTimer = new Timer();
-        superClockTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SuperClock.tick();
-            }
-        }, 0, 5);
+        Thread superClockThread = new Thread(() -> {while (true) SuperClock.tick();});
+        superClockThread.setDaemon(true);
+        superClockThread.start();
 
         Cursor.setScene(pScene);
 
@@ -115,6 +105,11 @@ public class MainWindow extends Application {
         setCurrentActiveCanvas(bv);
 
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
     }
 
     public static void setCurrentActiveCanvas(BoardViewer bv){
@@ -150,7 +145,7 @@ public class MainWindow extends Application {
         }
     }
 
-    public static void undo(){
+    private static void undo(){
         boolean found = false;
         for(int i = maxUndoQueueSize - 1; i >= 0; i--)
             if (undoQueue[i] != null && !found){
@@ -158,11 +153,5 @@ public class MainWindow extends Application {
                 undoQueue[i] = null;
                 found = true;
             }
-    }
-
-    @Override
-    public void stop() throws Exception {
-        superClockTimer.cancel();
-        superClockTimer.purge();
     }
 }

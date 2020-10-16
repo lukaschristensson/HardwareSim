@@ -44,6 +44,7 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
         if (this.out != null)
             return false;
         this.out = out;
+        generate();
         return true;
     }
 
@@ -89,29 +90,14 @@ public class Pass extends Component implements GeneratingComponent, ReactiveComp
     }
 
     @Override
-    public String react() {
+    public void react() {
         if (out != null)
-            EventWorker.addTriggerEvent((ps -> {
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            }));
-
-        return getName() + " has queued generate";
+            EventWorker.addTriggerEvent(this::generate);
     }
 
     @Override
-    public String generate() {
-        if (active)
-            return generate(false);
-        return "";
-    }
-
-    @Override
-    public String generate(boolean forced) {
-        if (out != null)
-            out.setState(in == null? new BinaryInt(0) : in.getState(), forced);
-        return getName() + " passed signal through";
+    public void generate() {
+        if (active && out != null)
+                out.setState(in == null? out.getState().inverse() : in.getState());
     }
 }

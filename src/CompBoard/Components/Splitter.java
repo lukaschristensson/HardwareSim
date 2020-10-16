@@ -17,6 +17,8 @@ public class Splitter extends CalculatingComponent {
 
     @Override
     BinaryInt[] calculateForInput(BinaryInt[] inputs) {
+        if(inputs[0] == null)
+            return new BinaryInt[]{new BinaryInt(0), new BinaryInt(0)};
         return new BinaryInt[]{inputs[0],inputs[0]};
     }
 

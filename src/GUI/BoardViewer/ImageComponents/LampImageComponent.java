@@ -10,6 +10,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class LampImageComponent extends ImageComponent implements Observer {
+    private Lamp lamp;
     private boolean lit;
 
     public LampImageComponent(){
@@ -18,7 +19,7 @@ public class LampImageComponent extends ImageComponent implements Observer {
 
     public LampImageComponent(Point pos, Lamp lamp) {
         super(pos, new Dimension(40,40));
-        this.comp = lamp;
+        this.lamp = lamp;
         lamp.addObserver(this);
     }
 
@@ -26,6 +27,11 @@ public class LampImageComponent extends ImageComponent implements Observer {
     public void drawSelf(GraphicsContext gc) {
         gc.drawImage(ImageLibrary.getImage(lit? images[1]:images[0]),pos.x,pos.y,dim.width,dim.height);
         drawNodes(gc);
+    }
+
+    @Override
+    public Component getComp() {
+        return lamp;
     }
 
     @Override

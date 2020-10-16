@@ -1,10 +1,7 @@
 package GUI.BoardViewer.ImageComponents;
 
-import CompBoard.Components.Clock;
+import CompBoard.Components.*;
 import CompBoard.Components.Component;
-import CompBoard.Components.GeneratingComponent;
-import CompBoard.Components.ReactiveComponent;
-import EventWorker.EventWorker;
 import GUI.BoardViewer.CableManipulator.CableLink;
 import GUI.CompMenu.ComponentMenuItem;
 import javafx.geometry.Bounds;
@@ -14,7 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.awt.*;
-import java.io.Serializable;
 
 
 public abstract class ImageComponent{
@@ -24,7 +20,6 @@ public abstract class ImageComponent{
     public Dimension dim;
     public Point pos;
     String[] images;
-    public Component comp;
     public CNode[] inputNodes;
     public CNode[] outputNodes;
 
@@ -42,26 +37,10 @@ public abstract class ImageComponent{
             setImageStrings();
     }
 
-    public void setSize(Dimension dim){
-        this.dim = dim;
-    }
-    public void setSize(int width, int height){
-        setSize(new Dimension(width,height));
-    }
-    public Dimension getSize() {
-        return dim;
-    }
-
     public void setPos(Point pos) {
         this.pos = pos;
     }
-    public Component getComp(){
-        return comp;
-    }
 
-    public CNode containsNodeAt(Number x, Number y){
-        return containsNodeAt(new Point(x.intValue(), y.intValue()));
-    }
     public CNode containsNodeAt(Point p){
         for (CNode n: inputNodes)
         if (n != null && n.contains(p))
@@ -70,10 +49,6 @@ public abstract class ImageComponent{
             if (n != null && n.contains(p))
                 return n;
         return null;
-    }
-
-    public boolean contains(Number x, Number y){
-        return contains(new Point(x.intValue(),y.intValue()));
     }
     public boolean contains(Point p){
         return getHitBox().contains(new Point2D(p.x,p.y));
@@ -86,7 +61,7 @@ public abstract class ImageComponent{
     private Bounds getHitBox(){
          return new Rectangle(pos.x,pos.y,dim.width,dim.height).getBoundsInLocal();
     }
-    public void drawNodes(GraphicsContext gc){
+    protected void drawNodes(GraphicsContext gc){
         if (inputNodes != null &&  outputNodes != null){
             for (CNode n: inputNodes)
                 n.drawSelf(gc, INPUT_NODE_COLOR);
@@ -115,7 +90,6 @@ public abstract class ImageComponent{
         }
     }
 
-    public abstract void drawSelf(GraphicsContext gc);
     public void drawSelf(GraphicsContext gc, Point p){
         Point truePos = pos;
         pos = p;
@@ -134,6 +108,12 @@ public abstract class ImageComponent{
     public abstract void setImageStrings();
     public abstract Integer[] getExternalPointDimensions();
     public abstract ImageComponent getEmptyCopy();
+    public abstract void drawSelf(GraphicsContext gc);
+    public abstract Component getComp();
+    public void forceGenerate(){
+        if (getComp() instanceof GeneratingComponent)
+            ((GeneratingComponent) getComp()).generate();
+    }
 
     public static class CNode{
         public ImageComponent parent;
@@ -142,7 +122,7 @@ public abstract class ImageComponent{
         CableLink cable;
         NodeType type;
 
-        public CNode(Point pos, Integer nodeID, ImageComponent parent, NodeType type){
+        CNode(Point pos, Integer nodeID, ImageComponent parent, NodeType type){
             this.nodeID = nodeID;
             this.pos = pos;
             this.parent = parent;
@@ -176,14 +156,11 @@ public abstract class ImageComponent{
                 this.cable = cb;
                 switch (type) {
                     case OUTPUT:
-                        if (!(parent.getComp() instanceof Clock))
-                            EventWorker.addTriggerEvent((ps -> {
-                                if (ps != null)
-                                    ps.println(((GeneratingComponent)parent.getComp()).generate(true));
-                                else
-                                    ((GeneratingComponent)parent.getComp()).generate(true);
-                            }));
-                        return ((GeneratingComponent)parent.getComp()).addOutput(cable.l);
+                        if (((GeneratingComponent)parent.getComp()).addOutput(cable.l)){
+                                parent.forceGenerate();
+                            return true;
+                        }
+                        return false;
                     case INPUT:
                         return ((ReactiveComponent) parent.getComp()).addInput(cable.l);
                     default:
@@ -192,12 +169,8 @@ public abstract class ImageComponent{
             }
             return false;
         }
-        public boolean clearCable(){
-            if (this.cable != null){
-                this.cable = null;
-                return true;
-            } else
-                return false;
+        public void clearCable(){
+            cable = null;
         }
     }
     public enum NodeType{

@@ -11,6 +11,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -78,6 +80,17 @@ public class ChipImageComponent extends ImageComponent implements ClickableCompo
         gc.setFill(basicChipColor);
         gc.fillRect(pos.x, pos.y, dim.width, dim.height);
         drawNodes(gc);
+    }
+
+    @Override
+    public Component getComp() {
+        return null;
+    }
+
+    @Override
+    public void forceGenerate() {
+        for (CNode c: outputNodes)
+            c.parent.forceGenerate();
     }
 
     @Override
@@ -152,6 +165,11 @@ public class ChipImageComponent extends ImageComponent implements ClickableCompo
         mainVBox.setAlignment(Pos.CENTER);
 
         g.getChildren().addAll(mainVBox);
+
+        s.addEventHandler(KeyEvent.KEY_PRESSED, (e)->{
+            if (e.getCode().equals(KeyCode.ESCAPE))
+                s.close();
+        });
 
         s.show();
     }

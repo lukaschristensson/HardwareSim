@@ -5,6 +5,5 @@ public interface GeneratingComponent {
     boolean setOutputs(Link[] out);
     boolean addOutput(Link out);
     boolean removeOutput(Link l);
-    String generate(boolean forced);
-    String generate();
+    void generate();
 }

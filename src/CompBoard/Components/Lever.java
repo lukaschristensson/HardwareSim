@@ -3,6 +3,9 @@ package CompBoard.Components;
 import EventWorker.EventWorker;
 import UtilPackage.BinaryInt;
 
+import java.util.Observable;
+import java.util.Observer;
+
 public class Lever extends Component implements GeneratingComponent {
     private Link outputLink;
     private boolean outputState;
@@ -65,32 +68,20 @@ public class Lever extends Component implements GeneratingComponent {
         return false;
     }
 
-    public boolean toggleOutput(){
-        outputState = !outputState;
-        EventWorker.addTriggerEvent((ps)->{
-           if (ps != null)
-               ps.println(generate());
-           else
-               generate();
-        });
-        return outputState;
-    }
-
-
-    @Override
-    public String generate(boolean forced) {
-        if (outputLink == null) {
-            return getName() + " switched, but is disconnected";
+    public void toggleOutput(){
+        if (active) {
+            outputState = !outputState;
+            EventWorker.addTriggerEvent(this::generate);
         }
-
-        outputLink.setState(outputState, forced);
-        return getName() + " switched to " + outputState;
     }
+
     @Override
-    public String generate() {
-        if (active)
-            return generate(false);
-        else
-            return "";
+    public void generate() {
+        if (active) {
+            if (outputLink != null)
+                outputLink.setState(outputState);
+            setChanged();
+            notifyObservers(outputState);
+        }
     }
 }

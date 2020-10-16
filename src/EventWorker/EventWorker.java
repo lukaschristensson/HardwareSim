@@ -2,40 +2,50 @@ package EventWorker;
 
 import TimeHandle.TimeDependant;
 
-import java.io.PrintStream;
-
 public class EventWorker implements TimeDependant {
-    public static long now = 0;
+    private static long now = 0;
     private static EventInst LIST;
-    private static final long BASE_ADD_TIME = 1;
-    private static PrintStream ps;
+    private final static Object concFlag = new Object();
+    private static final long BASE_ADD_TIME = 10;
 
     public static boolean addTriggerEvent(TriggerEvent te, long time) {
-        long insertTime = now + time + BASE_ADD_TIME;
+        synchronized (concFlag) {
+            long insertTime = now + time * 1000000L + BASE_ADD_TIME;
 
+            if (LIST == null || (insertTime < LIST.time)) {
+                EventInst newFirst = new EventInst(insertTime);
+                newFirst.next = LIST;
+                LIST = newFirst;
+            }
 
-        if (LIST == null || (insertTime < LIST.time)){
-            EventInst newFirst = new EventInst(insertTime);
-            newFirst.next = LIST;
-            LIST = newFirst;
+            return LIST.addTrigger(te, insertTime);
         }
-
-        return LIST.addTrigger(te,insertTime);
-    }
-    public static boolean addTriggerEvent(TriggerEvent te){
-        return addTriggerEvent(te,0);
     }
 
-    public static void setPrintStream(PrintStream ps){
-        EventWorker.ps = ps;
+    public static boolean addTriggerEvent(TriggerEvent te) {
+        synchronized (concFlag) {
+            return addTriggerEvent(te, 0);
+        }
     }
+
+
+    private Long lastSec = 0L;
+    private int calc = 0;
 
     @Override
     public void act(long now) {
-        EventWorker.now = now;
-        while (LIST != null && LIST.time <= now) {
-            LIST.run(ps);
-            LIST = LIST.next;
+        synchronized (concFlag) {
+            if ((now - lastSec) > 1000000000L) {
+                System.out.println("Calc last 1 sec: " + calc);
+                lastSec = now;
+                calc = 0;
+            }
+            EventWorker.now = now;
+            while (LIST != null && LIST.time <= EventWorker.now) {
+                calc++;
+                LIST.run();
+                LIST = LIST.next;
+            }
         }
     }
 }

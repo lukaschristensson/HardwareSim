@@ -14,8 +14,8 @@ public class SuperClock {
 
     public static void tick(){
         if (startTime == 0)
-            startTime = System.currentTimeMillis();
-        time = System.currentTimeMillis() - startTime;
+            startTime = System.nanoTime();
+        time = System.nanoTime() - startTime;
         if (tds != null)
             tds.forEach(e-> e.act(time));
     }

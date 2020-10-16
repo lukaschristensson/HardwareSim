@@ -6,5 +6,5 @@ public interface ReactiveComponent {
     boolean setInputs(Link [] in);
     boolean addInput(Link in);
     boolean removeInput(Link l);
-    String react();
+    void react();
 }

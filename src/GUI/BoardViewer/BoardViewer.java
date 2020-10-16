@@ -99,10 +99,13 @@ public class BoardViewer extends Canvas{
         update();
         MainWindow.addUndo(()->{
             ics.remove(ic);
+            if (ic instanceof ChipImageComponent)
+                ((ChipImageComponent) ic).deactivate();
             board.removeComponent(ic.getComp());
             update();
         });
     }
+
     public boolean removeComponent(ImageComponent ic){
         if(ics.remove(ic)){
             board.removeComponent(ic.getComp());
@@ -111,6 +114,7 @@ public class BoardViewer extends Canvas{
         }
         return false;
     }
+
     public void addDrawContributor(DrawContributer dc){
         dcs.add(dc);
     }

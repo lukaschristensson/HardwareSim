@@ -212,7 +212,7 @@ public class ChipCreator extends BoardViewer {
         }
     }
 
-    public void confirmChip(){
+    private void confirmChip(){
         ArrayList<ImageComponent.CNode> finalInNodes = new ArrayList<>();
         ArrayList<ImageComponent.CNode> finalOutNodes = new ArrayList<>();
         for (PassImageComponent pic: inNodes)
@@ -223,8 +223,8 @@ public class ChipCreator extends BoardViewer {
         currentChip.setInputNodes(finalInNodes.toArray(new ImageComponent.CNode[0]));
         currentChip.setOutputNodes(finalOutNodes.toArray(new ImageComponent.CNode[0]));
         currentChip.calcDim();
-        saveChip();
-        cancelAndExit();
+        if(saveChip())
+            cancelAndExit();
     }
 
     public Menu getAsMenu(){
@@ -435,13 +435,10 @@ public class ChipCreator extends BoardViewer {
 
         }
 
-        for (Link l : linksToRaise) {
+        for (Link l : linksToRaise)
             l.state = new BinaryInt(1);
-            l.forceNext();
-        }
-        for (Link l : linksToSink) {
-            l.forceNext();
-        }
+        for (Link l : linksToSink)
+            l.state = new BinaryInt(0);
 
 
         ChipImageComponent cic = new ChipImageComponent(inputSize, outputSize);
@@ -453,8 +450,9 @@ public class ChipCreator extends BoardViewer {
         cic.chipName = name;
 
         for (Pass p : reconstructedInputs) {
-            inputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).inputNodes[0]);
-            p.generate(true);
+            final PassImageComponent pic = new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p);
+            pic.forceGenerate();
+            inputNodes.add(pic.inputNodes[0]);
         }
         for (Pass p : reconstructedOutputs)
             outputNodes.add(new PassImageComponent(nodeOrbRad, nodeOrbBorderWidth, null, p).outputNodes[0]);
@@ -468,7 +466,7 @@ public class ChipCreator extends BoardViewer {
         return cic.setSaveData(saveString);
     }
 
-    private void saveChip(){
+    private boolean saveChip(){
         StringBuilder saveString = new StringBuilder();
 
         javafx.scene.control.Dialog<String[]> dialog = new Dialog<>();
@@ -584,15 +582,16 @@ public class ChipCreator extends BoardViewer {
                 err.setContentText("A non valid or name caused a problem, nothing was saved");
                 err.setHeaderText("Save failed");
                 err.showAndWait();
+                return false;
             }
-        } else  {
+        } else {
             Alert err = new Alert(Alert.AlertType.ERROR);
             err.setTitle("Error");
             err.setContentText("A non valid or name caused a problem, nothing was saved");
             err.setHeaderText("Save failed");
             err.showAndWait();
-        }
-
+            return false;
+        }return true;
     }
 
     public static String cleanSaveString(String s) {
@@ -610,31 +609,32 @@ public class ChipCreator extends BoardViewer {
                 if (!lines[i].isEmpty() && !lines[index].isEmpty() && i != index && lines[i].contains(">")) {
                     if (lines[i].contains(lines[index].split(" ")[0].substring(1)) || lines[i].contains(lines[index].split(" ")[2].substring(1))) {
 
+
                         String[] comps1 = lines[i].split((lines[i].contains(" --> ") ? " --> " : " -> "));
                         String[] comps2 = lines[index].split((lines[index].contains(" --> ") ? " --> " : " -> "));
 
                         if (comps1[0].substring(1).equals(comps2[0].substring(1)) &&
                                 comps1[0].contains(pChar) &&
                                 comps2[0].contains(pChar)) {
-                            lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
+                            lines[i] = comps1[1] + (lines[index].contains(" --> ") ? " --> " : " -> ") + comps2[1];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[0].substring(1).equals(comps2[1].substring(1)) &&
                                 comps1[0].contains(pChar) &&
                                 comps2[1].contains(pChar)) {
-                            lines[i] = comps1[1] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
+                            lines[i] = comps1[1] + (lines[index].contains(" --> ") ? " --> " : " -> ") + comps2[0];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[1].substring(1).equals(comps2[0].substring(1)) &&
                                 comps1[1].contains(pChar) &&
                                 comps2[0].contains(pChar)) {
-                            lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[1];
+                            lines[i] = comps1[0] + (lines[index].contains(" --> ") ? " --> " : " -> ") + comps2[1];
                             lines[index] = "";
                             clean = false;
                         } else if (comps1[1].substring(1).equals(comps2[1].substring(1)) &&
                                 comps1[1].contains(pChar) &&
                                 comps2[1].contains(pChar)) {
-                            lines[i] = comps1[0] + (lines[i].contains(" --> ") ? " --> " : " -> ") + comps2[0];
+                            lines[i] = comps1[0] + (lines[index].contains(" --> ") ? " --> " : " -> ") + comps2[0];
                             lines[index] = "";
                             clean = false;
                         }

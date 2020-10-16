@@ -4,7 +4,6 @@ import CompBoard.Components.GeneratingComponent;
 import CompBoard.Components.Link;
 import CompBoard.Components.ReactiveComponent;
 import GUI.BoardViewer.ImageComponents.ImageComponent;
-import GUI.MainWindow;
 import GUI.UndoEvent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -16,10 +15,10 @@ import java.util.Observer;
 
 public class CableLink implements Observer {
     public Link l;
-    Color color;
-    Integer width = 3;
-    ImageComponent.CNode from;
-    ImageComponent.CNode to;
+    private Color color;
+    private Integer width = 3;
+    private ImageComponent.CNode from;
+    private ImageComponent.CNode to;
     ArrayList<Point> path;
     public boolean completed;
 
@@ -31,36 +30,36 @@ public class CableLink implements Observer {
         return to;
     }
 
-    public CableLink(){
+    CableLink(){
         l = new Link();
         completed = false;
         path = new ArrayList<>();
     }
 
-    public boolean startDraw(ImageComponent.CNode node, Color color){
-        if (node == null)
-            return false;
-        this.color = color;
-        from = node;
-        path.add(node.getPosition());
-        return true;
+    void startDraw(ImageComponent.CNode node, Color color){
+        if (node != null) {
+            this.color = color;
+            from = node;
+            path.add(node.getPosition());
+        }
     }
 
     public void addPoint(int x, int y){
         addPoint(new Point(x, y));
     }
-    public void addPoint(Point p){
+    void addPoint(Point p){
         if (from != null)
             path.add(p);
     }
 
-    public UndoEvent completePath(ImageComponent.CNode node){
+    UndoEvent completePath(ImageComponent.CNode node){
         this.to = node;
         addPoint(node.getPosition());
         completed = true;
 
         if(from != to && to.setLink(this) && from.setLink(this)) {
             l.addObserver(this);
+            color = l.state.getAsBool() ? Color.RED:Color.BLACK;
             return ()->{
                 if (from.getType() == ImageComponent.NodeType.INPUT)
                     ((ReactiveComponent)from.parent.getComp()).removeInput(l);
@@ -106,9 +105,6 @@ public class CableLink implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if ((boolean)arg)
-            color = Color.RED;
-        else
-            color = Color.BLACK;
+        color = (boolean)arg ? Color.RED:Color.BLACK;
     }
 }

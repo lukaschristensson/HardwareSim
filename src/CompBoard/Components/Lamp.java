@@ -93,32 +93,17 @@ public class Lamp extends Component implements ReactiveComponent, GeneratingComp
 
 
     @Override
-    public String react() {
+    public void react() {
         lit = in.getState().getAsBool();
-        if(out != null) {
-            EventWorker.addTriggerEvent((ps -> {
-                if (ps != null)
-                    ps.println(generate());
-                else
-                    generate();
-            }));
-        }
+        if(out != null)
+            EventWorker.addTriggerEvent(this::generate);
         setChanged();
         notifyObservers(lit);
-        return getName() + " is now " + (lit? "lit" : " unlit") + (out != null? " and generate has been queued":"");
     }
+
     @Override
-    public String generate(boolean forced) {
-        if (out != null && in != null)
-            out.setState(in.getState(), forced);
-        if (out != null && in == null)
-            out.setState(0, forced);
-        return getName() + " passed signal through it";
-    }
-    @Override
-    public String generate() {
-        if (active)
-            return generate(false);
-        return "";
+    public void generate() {
+        if (active && out != null && in != null)
+            out.setState(in.getState());
     }
 }

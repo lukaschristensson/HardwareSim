@@ -4,7 +4,7 @@ import java.util.Observable;
 
 public abstract class Component extends Observable {
     public String name;
-    protected boolean active = true;
+    boolean active = true;
     public abstract String getName();
     public abstract char getCompChar();
     public abstract void deactivate();

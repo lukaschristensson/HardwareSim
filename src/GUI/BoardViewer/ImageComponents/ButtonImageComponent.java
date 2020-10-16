@@ -1,6 +1,7 @@
 package GUI.BoardViewer.ImageComponents;
 
 import CompBoard.Components.Button;
+import CompBoard.Components.Component;
 import GUI.BoardViewer.BoardViewer;
 import UtilPackage.ImageLibrary;
 import javafx.scene.canvas.GraphicsContext;
@@ -8,6 +9,7 @@ import javafx.scene.canvas.GraphicsContext;
 import java.awt.*;
 
 public class ButtonImageComponent extends ImageComponent implements ClickableComponent {
+    private Button button;
 
     public ButtonImageComponent(){
         this(null, new Button());
@@ -15,13 +17,23 @@ public class ButtonImageComponent extends ImageComponent implements ClickableCom
 
     public ButtonImageComponent(Point pos, Button button) {
         super(pos, new Dimension(40,40));
-        this.comp = button;
+        this.button = button;
     }
 
     @Override
     public void drawSelf(GraphicsContext gc) {
         gc.drawImage(ImageLibrary.getImage(images[0]),pos.x,pos.y,dim.width,dim.height);
         drawNodes(gc);
+    }
+
+    @Override
+    public Component getComp() {
+        return button;
+    }
+
+    @Override
+    public void forceGenerate() {
+        button.ghostGenerate();
     }
 
     @Override
@@ -41,6 +53,6 @@ public class ButtonImageComponent extends ImageComponent implements ClickableCom
 
     @Override
     public void clicked() {
-        ((Button)getComp()).press();
+        button.press();
     }
 }

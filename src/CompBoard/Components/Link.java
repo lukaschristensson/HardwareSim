@@ -8,12 +8,13 @@ import java.util.Observable;
 
 public class Link extends Observable {
     public BinaryInt state;
-    private boolean forceNext = false;
+    private boolean forceNext;
     private ArrayList<ReactiveComponent> chainComponents;
 
     public Link(){
         state = new BinaryInt();
         chainComponents = new ArrayList<>();
+        forceNext();
     }
 
     public BinaryInt getState() {
@@ -24,11 +25,11 @@ public class Link extends Observable {
         forceNext = true;
     }
 
-    public void addChainedComp(ReactiveComponent rc){
+    void addChainedComp(ReactiveComponent rc){
         if (!chainComponents.contains(rc))
             chainComponents.add(rc);
     }
-    public boolean removeChainedComp(ReactiveComponent rc){
+    boolean removeChainedComp(ReactiveComponent rc){
         return chainComponents.remove(rc);
     }
 
@@ -36,7 +37,7 @@ public class Link extends Observable {
         return chainComponents;
     }
 
-    public boolean contains(Object obj){
+    boolean contains(Object obj){
         if (obj instanceof ReactiveComponent)
             return chainComponents.contains(obj);
         if (obj instanceof Link)
@@ -46,46 +47,20 @@ public class Link extends Observable {
         return false;
     }
 
-    public void setState(BinaryInt state){
-        setState(state, false);
-    }
-
-    public void setState(BinaryInt state, boolean forced) {
-        if (forceNext) {
+    void setState(BinaryInt state) {
+        if (!this.state.equals(state) || forceNext) {
             forceNext = false;
             this.state = state;
             setChanged();
             notifyObservers(state.getAsBool());
             for (ReactiveComponent rc : chainComponents)
-                EventWorker.addTriggerEvent((ps) -> {
-                    if (ps != null)
-                        ps.println(rc.react());
-                    else
-                        rc.react();
-                });
-        } else if (!this.state.equals(state) || forced) {
-            this.state = state;
-            setChanged();
-            notifyObservers(state.getAsBool());
-            for (ReactiveComponent rc : chainComponents)
-                EventWorker.addTriggerEvent((ps) -> {
-                    if (ps != null)
-                        ps.println(rc.react());
-                    else
-                        rc.react();
-                });
+                EventWorker.addTriggerEvent(rc::react);
         }
     }
-    public void setState(int i){
+    void setState(int i){
         setState(new BinaryInt(i));
     }
-    public void setState(int i, boolean forced){
-        setState(new BinaryInt(i), forced);
-    }
-    public void setState(boolean b){
+    void setState(boolean b){
         setState(new BinaryInt(b));
-    }
-    public void setState(boolean b, boolean forced){
-        setState(new BinaryInt(b), forced);
     }
 }

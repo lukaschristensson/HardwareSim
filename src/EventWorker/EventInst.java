@@ -1,30 +1,34 @@
 package EventWorker;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 
-public class EventInst {
+class EventInst {
     EventInst next;
     long time;
+    private boolean running = false;
     private ArrayList<TriggerEvent> ets;
 
-    public int size(){
-        if (next== null)
+    private int size(){
+        if (next == null)
             return 1;
-        return next.size()+1;
+        return next.size() + 1;
     }
 
-    public EventInst(long time){
+    EventInst(long time){
         ets = new ArrayList<>();
         this.time = time;
     }
 
-    public boolean addTrigger(TriggerEvent te, long time){
-        if (time < this.time) {
+    boolean addTrigger(TriggerEvent te, long time){
+        if (te == null || time < this.time) {
+            System.out.println("threw event");
             return false;
         }
         if (this.time == time) {
-            ets.add(te);
+            if (running)
+                te.trigger();
+            else
+                ets.add(te);
             return true;
         }
         if (next == null){
@@ -41,11 +45,8 @@ public class EventInst {
         return next.addTrigger(te,time);
     }
 
-    public void run(PrintStream ps){
-        ets.forEach(e -> {
-            if (e != null)
-                e.trigger(ps);
-        });
-
+    void run(){
+        running = true;
+        ets.forEach(TriggerEvent::trigger);
     }
 }
